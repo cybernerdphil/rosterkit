@@ -1,15 +1,11 @@
-# Exclude everything by default
-*
+# Dependencies
+**/node_modules/
 
-# Allow these files
-!manager.html
-!staff-availability.html
-!manifest-manager.json
-!manifest-staff.json
-!sw-manager.js
-!sw-staff.js
-!assets/
-assets/*
-!assets/icon-192.png
-!assets/icon-512.png
-!.gitignore
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Capacitor build output (not source)
+**/ios/App/build/
+**/ios/App/DerivedData/
+**/ios/App/Pods/

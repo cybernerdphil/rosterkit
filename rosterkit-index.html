@@ -1,0 +1,3238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>RosterKit</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f1117" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── SHELL BASE ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    :root {
+      --bg:          #0f1117;
+      --bg2:         #161820;
+      --bg3:         #1d2030;
+      --border:      #272b3a;
+      --border2:     #363b50;
+      --text:        #eef0f8;
+      --text2:       #9298b0;
+      --text3:       #555d7a;
+      --accent:      #5b7fff;
+      --accent-glow: rgba(91,127,255,.18);
+      --accent-dim:  rgba(91,127,255,.10);
+      --green:       #3ecf8e;
+      --green-dim:   rgba(62,207,142,.12);
+      --amber:       #f5a623;
+      --amber-dim:   rgba(245,166,35,.12);
+      --red:         #f56565;
+      --red-dim:     rgba(245,101,101,.12);
+      --purple:      #a78bfa;
+      --purple-dim:  rgba(167,139,250,.12);
+      --radius:      14px;
+      --radius-sm:   8px;
+      --safe-top:    env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left:   env(safe-area-inset-left, 0px);
+      --safe-right:  env(safe-area-inset-right, 0px);
+    }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-left: var(--safe-left);
+      padding-right: var(--safe-right);
+    }
+
+    /* ── MODE PANELS ── */
+    .rk-mode { display: none; }
+    .rk-mode.active { display: block; }
+
+    /* ── BOTTOM MODE SWITCHER ── */
+    .rk-mode-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 300;
+      background: rgba(15,17,23,.95);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-top: 1px solid var(--border);
+      display: flex;
+      padding-bottom: var(--safe-bottom);
+    }
+
+    .rk-mode-btn {
+      flex: 1;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px;
+      padding: 10px 8px;
+      background: none; border: none;
+      font-family: 'Manrope', sans-serif;
+      font-size: 11px; font-weight: 600;
+      color: var(--text3);
+      cursor: pointer;
+      transition: color .15s;
+      -webkit-tap-highlight-color: transparent;
+      min-height: 56px;
+    }
+    .rk-mode-btn.active { color: var(--accent); }
+    .rk-mode-btn-icon { font-size: 22px; line-height: 1; }
+    .rk-mode-btn-label { letter-spacing: .1px; }
+
+    /* Active indicator bar */
+    .rk-mode-btn.active::before {
+      content: '';
+      position: absolute;
+      top: -1px; left: 50%; transform: translateX(-50%);
+      width: 32px; height: 2px;
+      background: var(--accent);
+      border-radius: 0 0 2px 2px;
+    }
+    .rk-mode-btn { position: relative; }
+
+    /* ── ONBOARDING SCREEN ── */
+    .rk-onboard {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center;
+      padding: calc(var(--safe-top) + 40px) 28px calc(100px + var(--safe-bottom));
+      text-align: center;
+    }
+    .rk-onboard-logo {
+      width: 80px; height: 80px;
+      background: linear-gradient(135deg, #3a52cc, var(--accent));
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px; margin: 0 auto 24px;
+      box-shadow: 0 0 40px var(--accent-glow);
+    }
+    .rk-onboard h1 {
+      font-size: 32px; font-weight: 800; letter-spacing: -.6px;
+      margin-bottom: 12px; line-height: 1.15;
+    }
+    .rk-onboard h1 em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .rk-onboard-desc {
+      font-size: 15px; color: var(--text2); line-height: 1.7;
+      max-width: 320px; margin: 0 auto 36px;
+    }
+    .rk-onboard-cards {
+      display: flex; flex-direction: column; gap: 12px;
+      width: 100%; max-width: 360px;
+    }
+    .rk-onboard-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+      display: flex; align-items: center; gap: 16px;
+      cursor: pointer; text-align: left;
+      transition: border-color .15s, background .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rk-onboard-card:active { border-color: var(--accent); background: var(--accent-dim); }
+    .rk-onboard-card-icon {
+      width: 48px; height: 48px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; flex-shrink: 0;
+    }
+    .rk-onboard-card-icon.staff   { background: var(--accent-dim); border: 1px solid var(--accent); }
+    .rk-onboard-card-icon.manager { background: var(--green-dim);  border: 1px solid var(--green);  }
+    .rk-onboard-card-title  { font-size: 15px; font-weight: 700; color: var(--text); }
+    .rk-onboard-card-desc   { font-size: 12px; color: var(--text3); margin-top: 2px; }
+    .rk-onboard-arrow { margin-left: auto; color: var(--text3); font-size: 18px; flex-shrink: 0; }
+
+    .rk-onboard-skip {
+      margin-top: 20px; font-size: 12px; color: var(--text3);
+      cursor: pointer; padding: 8px;
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+
+  <!-- ── STAFF STYLES ── -->
+  <style id="staff-styles">
+
+    /* ── RESET & ROOT ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    :root {
+      --bg:          #0f1117;
+      --bg2:         #161820;
+      --bg3:         #1d2030;
+      --border:      #272b3a;
+      --border2:     #363b50;
+      --text:        #eef0f8;
+      --text2:       #9298b0;
+      --text3:       #555d7a;
+      --accent:      #5b7fff;
+      --accent-glow: rgba(91,127,255,.18);
+      --accent-dim:  rgba(91,127,255,.10);
+      --green:       #3ecf8e;
+      --green-dim:   rgba(62,207,142,.12);
+      --amber:       #f5a623;
+      --amber-dim:   rgba(245,166,35,.12);
+      --red:         #f56565;
+      --red-dim:     rgba(245,101,101,.12);
+      --radius:      14px;
+      --radius-sm:   8px;
+      --safe-top:    env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left:   env(safe-area-inset-left, 0px);
+      --safe-right:  env(safe-area-inset-right, 0px);
+    }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+      padding-bottom: calc(80px + var(--safe-bottom));
+      padding-left: var(--safe-left);
+      padding-right: var(--safe-right);
+    }
+
+    /* ── HEADER ── */
+    .rk-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15,17,23,.88);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: calc(var(--safe-top) + 12px) 20px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .rk-brand { display: flex; align-items: center; gap: 10px; }
+
+    .rk-logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #3a52cc, var(--accent));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 20px var(--accent-glow);
+      flex-shrink: 0;
+    }
+
+    .rk-brand-name {
+      font-size: 17px; font-weight: 800;
+      letter-spacing: -.4px; color: var(--text);
+    }
+
+    .rk-brand-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; color: var(--text3);
+      letter-spacing: .8px; text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .rk-version {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--accent);
+      border: 1px solid rgba(91,127,255,.25);
+      padding: 3px 9px; border-radius: 20px;
+      background: var(--accent-dim);
+    }
+
+    /* ── HERO ── */
+    .rk-hero {
+      padding: 40px 20px 32px;
+      max-width: 580px; margin: 0 auto;
+    }
+
+    .rk-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; color: var(--accent);
+      letter-spacing: 1.2px; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .rk-hero h1 {
+      font-size: clamp(26px, 7vw, 36px);
+      font-weight: 800; letter-spacing: -.6px;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .rk-hero h1 em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .rk-hero-desc {
+      font-size: 14px; color: var(--text2); line-height: 1.7;
+    }
+
+    /* ── STEPS ── */
+    .rk-steps {
+      display: flex; flex-direction: column; gap: 0;
+      padding: 0 20px 32px; max-width: 580px; margin: 0 auto;
+    }
+
+    .rk-step {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .rk-step:last-child { border-bottom: none; }
+
+    .rk-step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent-dim); border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; font-weight: 500;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+
+    .rk-step-text strong { font-size: 14px; font-weight: 700; color: var(--text); }
+    .rk-step-text span { font-size: 13px; color: var(--text2); display: block; margin-top: 2px; }
+
+    /* ── MAIN CONTENT ── */
+    .rk-main {
+      padding: 0 20px; max-width: 580px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    /* ── CARDS ── */
+    .rk-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color .2s;
+    }
+    .rk-card:focus-within { border-color: var(--border2); }
+
+    .rk-card-head {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .rk-card-icon {
+      width: 38px; height: 38px;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+
+    .rk-card-title {
+      font-size: 15px; font-weight: 700; color: var(--text);
+      letter-spacing: -.2px;
+    }
+    .rk-card-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+    /* ── FORM GRID ── */
+    .rk-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .rk-grid .full { grid-column: 1 / -1; }
+
+    /* ── FORM ELEMENTS ── */
+    .rk-group { display: flex; flex-direction: column; gap: 6px; }
+
+    .rk-label {
+      font-size: 12px; font-weight: 600;
+      color: var(--text2); letter-spacing: .2px;
+      text-transform: uppercase;
+    }
+
+    .rk-required { color: var(--accent); margin-left: 2px; }
+
+    .rk-input, .rk-sel, .rk-textarea {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'Manrope', sans-serif;
+      font-size: 15px;
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      -webkit-appearance: none; appearance: none;
+      min-height: 44px; /* iOS touch target */
+    }
+
+    .rk-input:focus, .rk-sel:focus, .rk-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .rk-input::placeholder { color: var(--text3); }
+    .rk-input.error { border-color: var(--red); }
+    .rk-sel.error   { border-color: var(--red); }
+
+    .rk-sel {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%239298b0' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    .rk-err {
+      font-size: 11px; color: var(--red);
+      min-height: 16px; font-weight: 500;
+    }
+
+    .rk-hint {
+      font-size: 12px; color: var(--text3);
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 4px;
+      display: flex; gap: 8px; align-items: flex-start;
+    }
+    .rk-hint-icon { flex-shrink: 0; }
+
+    /* ── AVAILABILITY TABLE ── */
+    .rk-avail-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: var(--radius-sm);
+    }
+
+    .rk-avail-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 340px;
+    }
+
+    .rk-avail-tbl thead th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 500;
+      color: var(--text3);
+      letter-spacing: .8px; text-transform: uppercase;
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .rk-avail-tbl tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .rk-avail-tbl tbody tr:last-child { border-bottom: none; }
+    .rk-avail-tbl tbody tr:hover { background: var(--bg3); }
+
+    .rk-avail-tbl td { padding: 10px; vertical-align: middle; }
+    .rk-avail-tbl td:first-child { padding-left: 4px; }
+
+    .rk-day-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .rk-day-abbr {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--text3);
+    }
+
+    .rk-tsel {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      padding: 6px 8px;
+      outline: none;
+      -webkit-appearance: none; appearance: none;
+      cursor: pointer;
+      min-height: 36px;
+      transition: border-color .15s;
+    }
+    .rk-tsel:focus { border-color: var(--accent); }
+
+    .rk-status-sel { width: 126px; }
+    .rk-time-sel   { width: 82px; }
+    .rk-time-cell  { display: flex; align-items: center; gap: 6px; }
+    .rk-time-sep   { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); }
+
+    .rk-st-badge { display: inline-block; }
+    .rk-st-off   {
+      font-size: 11px; font-weight: 600;
+      color: var(--red); background: var(--red-dim);
+      border: 1px solid rgba(245,101,101,.2);
+      border-radius: 20px; padding: 3px 10px;
+    }
+    .rk-st-leave {
+      font-size: 11px; font-weight: 600;
+      color: var(--amber); background: var(--amber-dim);
+      border: 1px solid rgba(245,166,35,.2);
+      border-radius: 20px; padding: 3px 10px;
+    }
+
+    /* ── SUBMIT CARD ── */
+    .rk-submit-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .rk-cta {
+      width: 100%;
+      background: linear-gradient(135deg, #3a52cc, var(--accent));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Manrope', sans-serif;
+      font-size: 16px; font-weight: 700;
+      padding: 15px 24px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: opacity .2s, transform .1s;
+      min-height: 52px;
+      box-shadow: 0 4px 24px var(--accent-glow);
+      letter-spacing: -.2px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rk-cta:active { transform: scale(.98); opacity: .9; }
+    .rk-cta:disabled { opacity: .5; cursor: not-allowed; }
+
+    .rk-share-btn {
+      width: 100%; margin-top: 10px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text2);
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px; font-weight: 600;
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rk-share-btn:active { border-color: var(--accent); color: var(--accent); }
+
+    .rk-cta-note {
+      font-size: 12px; color: var(--text3);
+      text-align: center; margin-top: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── SUCCESS SCREEN ── */
+    .rk-success {
+      display: none;
+      padding: 40px 20px;
+      max-width: 580px; margin: 0 auto;
+      text-align: center;
+    }
+    .rk-success.open { display: block; }
+
+    .rk-success-ring {
+      width: 80px; height: 80px;
+      background: var(--green-dim);
+      border: 2px solid var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; margin: 0 auto 24px;
+    }
+
+    .rk-success h2 {
+      font-size: 24px; font-weight: 800;
+      letter-spacing: -.4px; margin-bottom: 12px;
+    }
+
+    .rk-success p { font-size: 14px; color: var(--text2); margin-bottom: 28px; }
+
+    .rk-success-steps {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+      text-align: left; margin-bottom: 24px;
+    }
+
+    .rk-success-steps h3 {
+      font-size: 13px; font-weight: 700;
+      color: var(--text2); text-transform: uppercase;
+      letter-spacing: .5px; margin-bottom: 16px;
+    }
+
+    .rk-success-step {
+      display: flex; gap: 12px; align-items: flex-start;
+      margin-bottom: 14px; font-size: 14px; color: var(--text2);
+    }
+    .rk-success-step:last-child { margin-bottom: 0; }
+
+    .rk-success-step-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--accent-dim); color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 500;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+
+    .rk-filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: var(--accent);
+    }
+
+    .rk-btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text2);
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px; font-weight: 600;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rk-btn-ghost:active { border-color: var(--accent); color: var(--accent); }
+
+    /* ── FOOTER ── */
+    .rk-footer {
+      text-align: center;
+      padding: 32px 20px calc(16px + var(--safe-bottom));
+      font-size: 12px; color: var(--text3);
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    /* ── TOASTS ── */
+    #rk-toasts {
+      position: fixed; bottom: calc(24px + var(--safe-bottom));
+      right: 20px; left: 20px;
+      display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none; z-index: 999;
+    }
+
+    .rk-toast {
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 12px 16px;
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+      animation: toastIn .25s ease;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    .rk-toast.success { border-color: var(--green); color: var(--green); }
+    .rk-toast.error   { border-color: var(--red);   color: var(--red); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── BRANDING ── */
+    .rk-pbp {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--text3);
+      text-align: center; padding: 8px 0 0;
+    }
+
+    /* ── MOBILE TWEAKS ── */
+    @media (max-width: 400px) {
+      .rk-hero h1    { font-size: 24px; }
+      .rk-grid       { grid-template-columns: 1fr; }
+      .rk-status-sel { width: 110px; }
+      .rk-time-sel   { width: 74px; }
+    }
+  
+  </style>
+
+  <!-- ── MANAGER STYLES ── -->
+  <style id="manager-styles">
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    :root {
+      --bg:          #0f1117;
+      --bg2:         #161820;
+      --bg3:         #1d2030;
+      --border:      #272b3a;
+      --border2:     #363b50;
+      --text:        #eef0f8;
+      --text2:       #9298b0;
+      --text3:       #555d7a;
+      --accent:      #5b7fff;
+      --accent-glow: rgba(91,127,255,.18);
+      --accent-dim:  rgba(91,127,255,.10);
+      --green:       #3ecf8e;
+      --green-dim:   rgba(62,207,142,.12);
+      --amber:       #f5a623;
+      --amber-dim:   rgba(245,166,35,.12);
+      --red:         #f56565;
+      --red-dim:     rgba(245,101,101,.12);
+      --purple:      #a78bfa;
+      --purple-dim:  rgba(167,139,250,.12);
+      --radius:      14px;
+      --radius-sm:   8px;
+      --safe-top:    env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left:   env(safe-area-inset-left, 0px);
+      --safe-right:  env(safe-area-inset-right, 0px);
+    }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+      padding-bottom: calc(80px + var(--safe-bottom));
+      padding-left: var(--safe-left);
+      padding-right: var(--safe-right);
+    }
+
+    /* ── HEADER ── */
+    .rk-header {
+      position: sticky; top: 0; z-index: 200;
+      background: rgba(15,17,23,.9);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: calc(var(--safe-top) + 12px) 20px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px;
+    }
+    .rk-brand { display: flex; align-items: center; gap: 10px; }
+    .rk-logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #3a52cc, var(--accent));
+      border-radius: 10px; display: flex; align-items: center;
+      justify-content: center; font-size: 18px; flex-shrink: 0;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .rk-brand-name  { font-size: 17px; font-weight: 800; letter-spacing: -.4px; }
+    .rk-brand-sub   { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: .8px; text-transform: uppercase; margin-top: 1px; }
+    .rk-pro-badge   { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--amber); border: 1px solid rgba(245,166,35,.3); padding: 3px 9px; border-radius: 20px; background: var(--amber-dim); white-space: nowrap; }
+    .rk-free-badge  { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); border: 1px solid var(--border); padding: 3px 9px; border-radius: 20px; background: var(--bg3); cursor: pointer; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+
+    /* ── TABS ── */
+    .rk-tabs-wrap {
+      position: sticky; top: calc(var(--safe-top) + 62px); z-index: 100;
+      background: rgba(15,17,23,.9);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .rk-tabs-wrap::-webkit-scrollbar { display: none; }
+    .rk-tabs {
+      display: flex; gap: 0;
+      padding: 0 16px;
+      min-width: max-content;
+    }
+    .rk-tab {
+      display: flex; align-items: center; gap: 7px;
+      padding: 12px 16px;
+      font-size: 13px; font-weight: 600; color: var(--text3);
+      border-bottom: 2px solid transparent;
+      cursor: pointer; white-space: nowrap;
+      transition: color .15s, border-color .15s;
+      -webkit-tap-highlight-color: transparent;
+      background: none; border-top: none; border-left: none; border-right: none;
+      font-family: 'Manrope', sans-serif;
+    }
+    .rk-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .rk-tab-icon   { font-size: 15px; }
+    .rk-tab-lock   { font-size: 10px; color: var(--amber); }
+
+    /* ── PANELS ── */
+    .rk-panel { display: none; padding: 20px; max-width: 640px; margin: 0 auto; }
+    .rk-panel.active { display: block; }
+
+    /* ── SECTION HEADER ── */
+    .rk-sec-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; gap: 12px;
+    }
+    .rk-sec-title { font-size: 16px; font-weight: 800; letter-spacing: -.3px; }
+    .rk-sec-sub   { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+    /* ── BUTTONS ── */
+    .rk-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 16px; border-radius: var(--radius-sm);
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; border: none;
+      min-height: 40px; white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity .15s, transform .1s;
+    }
+    .rk-btn:active { transform: scale(.97); opacity: .85; }
+
+    .rk-btn-primary {
+      background: linear-gradient(135deg,#3a52cc,var(--accent));
+      color: #fff; box-shadow: 0 2px 12px var(--accent-glow);
+    }
+    .rk-btn-ghost {
+      background: transparent; color: var(--text2);
+      border: 1px solid var(--border2);
+    }
+    .rk-btn-danger {
+      background: var(--red-dim); color: var(--red);
+      border: 1px solid rgba(245,101,101,.2);
+    }
+    .rk-btn-sm { padding: 6px 12px; font-size: 12px; min-height: 32px; }
+    .rk-btn-full { width: 100%; justify-content: center; padding: 13px; min-height: 48px; font-size: 15px; }
+
+    /* ── FORM ELEMENTS ── */
+    .rk-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+    .rk-group:last-child { margin-bottom: 0; }
+    .rk-label  { font-size: 12px; font-weight: 600; color: var(--text2); letter-spacing: .2px; text-transform: uppercase; }
+    .rk-req    { color: var(--accent); margin-left: 2px; }
+    .rk-input, .rk-sel {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); color: var(--text);
+      font-family: 'Manrope', sans-serif; font-size: 15px;
+      padding: 11px 14px; outline: none; min-height: 44px;
+      transition: border-color .15s, box-shadow .15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    .rk-input:focus, .rk-sel:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+    .rk-input::placeholder { color: var(--text3); }
+    .rk-sel {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%239298b0' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 12px center;
+      background-size: 16px; padding-right: 36px; cursor: pointer;
+    }
+    .rk-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .rk-err  { font-size: 11px; color: var(--red); font-weight: 500; min-height: 16px; }
+
+    /* ── CARDS ── */
+    .rk-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+    }
+    .rk-card:last-child { margin-bottom: 0; }
+
+    /* ── JOB ITEMS ── */
+    .rk-job-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+    .rk-job-dot {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+    }
+    .rk-job-info { flex: 1; min-width: 0; }
+    .rk-job-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .rk-job-meta { font-size: 12px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+    .rk-job-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* ── STAFF ITEMS ── */
+    .rk-staff-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+    .rk-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--accent-dim); border: 1px solid var(--accent);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; color: var(--accent);
+      flex-shrink: 0; font-family: 'JetBrains Mono', monospace;
+    }
+    .rk-staff-info { flex: 1; min-width: 0; }
+    .rk-staff-name  { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rk-staff-meta  { font-size: 12px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .rk-staff-role  { font-size: 11px; color: var(--accent); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+
+    /* ── LOCATION ITEMS ── */
+    .rk-loc-item {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+    .rk-loc-icon  { font-size: 20px; flex-shrink: 0; }
+    .rk-loc-info  { flex: 1; min-width: 0; }
+    .rk-loc-name  { font-size: 14px; font-weight: 700; color: var(--text); }
+    .rk-loc-addr  { font-size: 12px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* ── ROSTER CELL — job + location stacked ── */
+    .rk-shift-cell { display: flex; flex-direction: column; gap: 4px; }
+    .rk-loc-sel {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text2);
+      font-family: 'Manrope', sans-serif; font-size: 11px;
+      padding: 4px 6px; outline: none;
+      width: 100%; min-width: 70px;
+      -webkit-appearance: none; appearance: none;
+      cursor: pointer; min-height: 28px;
+      transition: border-color .15s;
+      font-style: italic;
+    }
+    .rk-loc-sel:focus  { border-color: var(--accent); }
+    .rk-loc-sel.has-loc { font-style: normal; color: var(--text); border-color: rgba(91,127,255,.3); }
+
+    /* ── AVAILABILITY IMPORTED ── */
+    .rk-avail-imported {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 11px; color: var(--green);
+      background: var(--green-dim); border: 1px solid rgba(62,207,142,.2);
+      border-radius: 20px; padding: 2px 10px; margin-top: 4px;
+      width: fit-content;
+    }
+
+    /* ── ROSTER GRID ── */
+    .rk-roster-wrap {
+      overflow-x: auto; -webkit-overflow-scrolling: touch;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .rk-roster-tbl {
+      width: 100%; border-collapse: collapse;
+      min-width: 480px; background: var(--bg2);
+    }
+    .rk-roster-tbl th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 500; color: var(--text3);
+      letter-spacing: .8px; text-transform: uppercase;
+      padding: 10px 12px; border-bottom: 1px solid var(--border);
+      white-space: nowrap; text-align: center; background: var(--bg3);
+    }
+    .rk-roster-tbl th:first-child { text-align: left; position: sticky; left: 0; z-index: 2; }
+    .rk-roster-tbl td {
+      padding: 8px; border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border); vertical-align: middle;
+      text-align: center; min-width: 80px;
+    }
+    .rk-roster-tbl td:first-child {
+      text-align: left; position: sticky; left: 0; z-index: 1;
+      background: var(--bg2); min-width: 120px; padding: 8px 12px;
+    }
+    .rk-roster-tbl tr:last-child td { border-bottom: none; }
+    .rk-roster-tbl td:last-child { border-right: none; }
+
+    .rk-cell-name  { font-size: 13px; font-weight: 600; color: var(--text); }
+    .rk-cell-role  { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+
+    .rk-shift-sel {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text);
+      font-family: 'Manrope', sans-serif; font-size: 12px;
+      padding: 5px 6px; outline: none;
+      width: 100%; min-width: 70px;
+      -webkit-appearance: none; appearance: none;
+      cursor: pointer; min-height: 36px;
+      transition: border-color .15s;
+    }
+    .rk-shift-sel:focus { border-color: var(--accent); }
+    .rk-shift-sel.avail   { border-color: rgba(62,207,142,.4); background: var(--green-dim); }
+    .rk-shift-sel.unavail { border-color: rgba(245,101,101,.3); opacity: .6; }
+
+    /* ── AVAIL STATUS DOT ── */
+    .rk-avail-dot {
+      display: inline-block; width: 6px; height: 6px;
+      border-radius: 50%; margin-right: 4px; vertical-align: middle;
+    }
+    .dot-avail   { background: var(--green); }
+    .dot-unavail { background: var(--red); }
+    .dot-leave   { background: var(--amber); }
+    .dot-none    { background: var(--text3); }
+
+    /* ── IMPORT ZONE ── */
+    .rk-drop-zone {
+      border: 2px dashed var(--border2); border-radius: var(--radius);
+      padding: 32px 20px; text-align: center;
+      cursor: pointer; transition: border-color .2s, background .2s;
+      background: var(--bg2);
+    }
+    .rk-drop-zone.drag-over { border-color: var(--accent); background: var(--accent-dim); }
+    .rk-drop-icon  { font-size: 32px; margin-bottom: 10px; }
+    .rk-drop-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .rk-drop-sub   { font-size: 13px; color: var(--text3); }
+    #rk-file-input { display: none; }
+
+    /* ── IMPORT LOG ── */
+    .rk-import-log {
+      margin-top: 14px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .rk-import-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 14px;
+      font-size: 13px;
+    }
+    .rk-import-row.success { border-color: rgba(62,207,142,.3); }
+    .rk-import-row.error   { border-color: rgba(245,101,101,.3); color: var(--text2); }
+    .rk-import-icon { font-size: 16px; flex-shrink: 0; }
+    .rk-import-name { font-weight: 600; color: var(--text); flex: 1; }
+    .rk-import-detail { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+
+    /* ── FREE TIER LIMIT BAR ── */
+    .rk-limit-bar {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 14px;
+      margin-bottom: 14px;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    }
+    .rk-limit-label { font-size: 12px; color: var(--text3); }
+    .rk-limit-count { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+    .rk-limit-count.warn { color: var(--amber); }
+    .rk-limit-count.full { color: var(--red); }
+
+    /* ── PAYWALL OVERLAY ── */
+    .rk-paywall {
+      display: none; position: fixed; inset: 0; z-index: 500;
+      background: rgba(0,0,0,.7); backdrop-filter: blur(8px);
+      align-items: flex-end; justify-content: center; padding: 0;
+    }
+    .rk-paywall.open { display: flex; }
+    .rk-paywall-sheet {
+      background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 24px 24px 0 0; padding: 28px 24px calc(32px + var(--safe-bottom));
+      width: 100%; max-width: 560px;
+      animation: slideUp .25s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .rk-paywall-handle {
+      width: 40px; height: 4px; border-radius: 2px;
+      background: var(--border2); margin: 0 auto 20px;
+    }
+    .rk-paywall h2 { font-size: 22px; font-weight: 800; letter-spacing: -.4px; margin-bottom: 8px; }
+    .rk-paywall-sub { font-size: 14px; color: var(--text2); margin-bottom: 22px; line-height: 1.6; }
+    .rk-paywall-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+    .rk-paywall-feat {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; color: var(--text);
+    }
+    .rk-paywall-feat-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .rk-paywall-feat strong { display: block; font-weight: 700; }
+    .rk-paywall-feat span   { font-size: 12px; color: var(--text3); }
+    .rk-paywall-price {
+      text-align: center; margin-bottom: 16px;
+      font-size: 13px; color: var(--text3);
+    }
+    .rk-paywall-price strong { font-size: 28px; font-weight: 800; color: var(--text); letter-spacing: -.5px; }
+    .rk-paywall-price span   { font-size: 13px; }
+    .rk-paywall-actions { display: flex; flex-direction: column; gap: 10px; }
+    .rk-restore-link {
+      text-align: center; font-size: 12px; color: var(--text3);
+      cursor: pointer; padding: 8px; -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── WEEK NAV ── */
+    .rk-week-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 14px;
+      margin-bottom: 14px;
+    }
+    .rk-week-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 12px;
+      color: var(--text2); text-align: center; flex: 1;
+    }
+    .rk-week-btn {
+      background: none; border: none; color: var(--text2);
+      font-size: 18px; cursor: pointer; padding: 4px 8px;
+      min-height: 36px; min-width: 36px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px; transition: background .15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rk-week-btn:active { background: var(--bg3); }
+
+    /* ── EMPTY STATE ── */
+    .rk-empty {
+      text-align: center; padding: 40px 20px;
+      color: var(--text3); font-size: 13px;
+    }
+    .rk-empty-icon { font-size: 36px; margin-bottom: 12px; }
+    .rk-empty-title { font-size: 15px; font-weight: 700; color: var(--text2); margin-bottom: 6px; }
+
+    /* ── TOASTS ── */
+    #rk-toasts {
+      position: fixed; bottom: calc(24px + var(--safe-bottom));
+      right: 20px; left: 20px;
+      display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none; z-index: 999;
+    }
+    .rk-toast {
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 12px 16px;
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+      animation: toastIn .25s ease;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    .rk-toast.success { border-color: var(--green); color: var(--green); }
+    .rk-toast.error   { border-color: var(--red);   color: var(--red);   }
+    .rk-toast.info    { border-color: var(--accent); color: var(--accent); }
+    @keyframes toastIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+    /* ── PIN PAD ── */
+    .rk-pin-dot {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid var(--border2);
+      background: transparent;
+      transition: background .15s, border-color .15s, transform .1s;
+    }
+    .rk-pin-dot.filled {
+      background: var(--accent); border-color: var(--accent);
+      transform: scale(1.1);
+    }
+    .rk-pin-dot.error {
+      background: var(--red); border-color: var(--red);
+      animation: pinShake .3s ease;
+    }
+    @keyframes pinShake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-6px); }
+      40%      { transform: translateX(6px); }
+      60%      { transform: translateX(-4px); }
+      80%      { transform: translateX(4px); }
+    }
+
+    .rk-pin-pad {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 12px; max-width: 280px; margin: 0 auto;
+    }
+    .rk-pin-key {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0;
+      height: 64px; font-family: 'Manrope', sans-serif;
+      font-size: 20px; font-weight: 700; color: var(--text);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .1s, transform .1s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .rk-pin-key:active { background: var(--bg3); transform: scale(.95); }
+    .rk-pin-key.del    { font-size: 18px; color: var(--text2); }
+    .rk-pin-key.empty  { background: transparent; border-color: transparent; cursor: default; pointer-events: none; }
+
+    @media (max-width: 400px) {
+      .rk-row { grid-template-columns: 1fr; }
+      .rk-tab { padding: 10px 12px; font-size: 12px; }
+    }
+  
+  </style>
+</head>
+<body>
+
+  <!-- ── ONBOARDING (shown on very first launch) ── -->
+  <div id="rk-onboard" class="rk-onboard" style="display:none;">
+    <div class="rk-onboard-logo">📋</div>
+    <h1>Welcome to<br><em>RosterKit</em></h1>
+    <p class="rk-onboard-desc">
+      Shift scheduling for any industry. No subscription, no account, works offline.
+    </p>
+    <div class="rk-onboard-cards">
+      <div class="rk-onboard-card" onclick="selectRole('staff')">
+        <div class="rk-onboard-card-icon staff">👤</div>
+        <div>
+          <div class="rk-onboard-card-title">I'm a Team Member</div>
+          <div class="rk-onboard-card-desc">Submit my weekly availability to my manager</div>
+        </div>
+        <div class="rk-onboard-arrow">›</div>
+      </div>
+      <div class="rk-onboard-card" onclick="selectRole('manager')">
+        <div class="rk-onboard-card-icon manager">📅</div>
+        <div>
+          <div class="rk-onboard-card-title">I'm a Manager</div>
+          <div class="rk-onboard-card-desc">Build rosters, assign shifts, send schedules</div>
+        </div>
+        <div class="rk-onboard-arrow">›</div>
+      </div>
+    </div>
+    <div class="rk-onboard-skip" onclick="skipOnboard()">Skip — I'll choose later</div>
+  </div>
+
+  <!-- ── STAFF MODE ── -->
+  <div id="mode-staff" class="rk-mode">
+    <!-- HEADER -->
+  <header class="rk-header">
+    <div class="rk-brand">
+      <div class="rk-logo">📋</div>
+      <div>
+        <div class="rk-brand-name">RosterKit</div>
+        <div class="rk-brand-sub">Availability Form</div>
+      </div>
+    </div>
+    <div class="rk-version">v1.0</div>
+  </header>
+
+  <!-- FORM AREA -->
+  <div id="rk-form-area">
+
+    <!-- Hero -->
+    <div class="rk-hero">
+      <div class="rk-eyebrow">Team Member</div>
+      <h1>Submit Your<br><em>Availability</em></h1>
+      <p class="rk-hero-desc">
+        Fill in your details and weekly availability, then tap Submit —
+        your file downloads and an email to your manager opens ready to send.
+      </p>
+    </div>
+
+    <!-- How it works -->
+    <div class="rk-steps">
+      <div class="rk-step">
+        <div class="rk-step-num">1</div>
+        <div class="rk-step-text">
+          <strong>Fill in this form</strong>
+          <span>Enter your details and set your availability for each day.</span>
+        </div>
+      </div>
+      <div class="rk-step">
+        <div class="rk-step-num">2</div>
+        <div class="rk-step-text">
+          <strong>Tap Submit</strong>
+          <span>Your availability file downloads to your device automatically.</span>
+        </div>
+      </div>
+      <div class="rk-step">
+        <div class="rk-step-num">3</div>
+        <div class="rk-step-text">
+          <strong>Attach &amp; Send</strong>
+          <span>An email to your manager opens — attach the file and hit Send.</span>
+        </div>
+      </div>
+    </div>
+
+    <main class="rk-main">
+
+      <!-- MANAGER SETUP CARD -->
+      <div class="rk-card">
+        <div class="rk-card-head">
+          <div class="rk-card-icon">⚙️</div>
+          <div>
+            <div class="rk-card-title">Manager Setup</div>
+            <div class="rk-card-sub">Pre-filled by your manager before distribution</div>
+          </div>
+        </div>
+        <div class="rk-hint">
+          <span class="rk-hint-icon">ℹ️</span>
+          <span>Enter your manager's email. This is who your availability file will be sent to. Ask your manager if unsure.</span>
+        </div>
+        <div class="rk-group" style="margin-top:12px">
+          <label class="rk-label" for="rk-manager-email">
+            Manager Email <span class="rk-required">*</span>
+          </label>
+          <input class="rk-input" type="email" id="rk-manager-email"
+            placeholder="manager@yourworkplace.com" maxlength="150"
+            autocomplete="off" inputmode="email" />
+          <div class="rk-err" id="rk-manager-email-err"></div>
+        </div>
+      </div>
+
+      <!-- YOUR DETAILS CARD -->
+      <div class="rk-card">
+        <div class="rk-card-head">
+          <div class="rk-card-icon">👤</div>
+          <div>
+            <div class="rk-card-title">Your Details</div>
+            <div class="rk-card-sub">Enter your details as they appear on the roster</div>
+          </div>
+        </div>
+        <div class="rk-grid">
+
+          <div class="rk-group full">
+            <label class="rk-label" for="rk-name">Full Name <span class="rk-required">*</span></label>
+            <input class="rk-input" type="text" id="rk-name"
+              placeholder="e.g. Alex Johnson"
+              autocomplete="name" maxlength="100" />
+            <div class="rk-err" id="rk-name-err"></div>
+          </div>
+
+          <div class="rk-group full">
+            <label class="rk-label" for="rk-email">Your Email <span class="rk-required">*</span></label>
+            <input class="rk-input" type="email" id="rk-email"
+              placeholder="you@email.com"
+              autocomplete="email" maxlength="150"
+              inputmode="email" />
+            <div class="rk-err" id="rk-email-err"></div>
+          </div>
+
+          <div class="rk-group">
+            <label class="rk-label" for="rk-phone">Phone</label>
+            <input class="rk-input" type="tel" id="rk-phone"
+              placeholder="04XX XXX XXX"
+              autocomplete="tel" maxlength="20"
+              inputmode="tel" />
+          </div>
+
+          <div class="rk-group">
+            <label class="rk-label" for="rk-basis">Employment Type <span class="rk-required">*</span></label>
+            <select class="rk-sel" id="rk-basis">
+              <option value="">— Select —</option>
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+              <option value="Casual">Casual</option>
+              <option value="Contractor">Contractor</option>
+            </select>
+            <div class="rk-err" id="rk-basis-err"></div>
+          </div>
+
+          <div class="rk-group full">
+            <label class="rk-label" for="rk-role">Your Role / Position <span class="rk-required">*</span></label>
+            <input class="rk-input" type="text" id="rk-role"
+              placeholder="e.g. Driver, Cashier, Site Supervisor"
+              maxlength="100" />
+            <div class="rk-err" id="rk-role-err"></div>
+          </div>
+
+          <div class="rk-group full">
+            <label class="rk-label" for="rk-rate">Hourly Rate (optional)</label>
+            <input class="rk-input" type="text" id="rk-rate"
+              placeholder="e.g. 28.50"
+              maxlength="10" inputmode="decimal" />
+          </div>
+
+          <div class="rk-group full">
+            <label class="rk-label" for="rk-notes">Notes for Manager (optional)</label>
+            <input class="rk-input" type="text" id="rk-notes"
+              placeholder="e.g. Prefer early shifts, can't do Friday nights"
+              maxlength="200" />
+          </div>
+
+        </div>
+      </div>
+
+      <!-- AVAILABILITY CARD -->
+      <div class="rk-card">
+        <div class="rk-card-head">
+          <div class="rk-card-icon">📅</div>
+          <div>
+            <div class="rk-card-title">Weekly Availability</div>
+            <div class="rk-card-sub">Set your status and preferred hours for each day</div>
+          </div>
+        </div>
+        <div class="rk-avail-wrap">
+          <table class="rk-avail-tbl">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Status</th>
+                <th>Hours</th>
+              </tr>
+            </thead>
+            <tbody id="rk-avail-body">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUBMIT CARD -->
+      <div class="rk-submit-card">
+        <div class="rk-card-head" style="margin-bottom:16px">
+          <div class="rk-card-icon">📤</div>
+          <div>
+            <div class="rk-card-title">Submit Your Availability</div>
+            <div class="rk-card-sub">File downloads, email opens — one tap</div>
+          </div>
+        </div>
+        <button class="rk-cta" id="rk-submit-btn">
+          <span>📎</span><span>Download &amp; Open Email</span>
+        </button>
+        <button class="rk-share-btn" id="rk-share">Share File Instead</button>
+        <p class="rk-cta-note">
+          Your data stays on your device &nbsp;·&nbsp; No server &nbsp;·&nbsp; No tracking
+        </p>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div class="rk-success" id="rk-success">
+    <div class="rk-success-ring">✓</div>
+    <h2>File Downloaded!</h2>
+    <p>Your availability file is saved. Attach it to the email that just opened and send it to your manager.</p>
+    <div class="rk-success-steps">
+      <h3>Next Steps</h3>
+      <div class="rk-success-step">
+        <div class="rk-success-step-num">1</div>
+        <div>Find <strong id="rk-filename-display" class="rk-filename"></strong> in your <strong>Downloads</strong> or <strong>Files</strong> app.</div>
+      </div>
+      <div class="rk-success-step">
+        <div class="rk-success-step-num">2</div>
+        <div>Switch to your <strong>email app</strong> — the message to your manager should already be open.</div>
+      </div>
+      <div class="rk-success-step">
+        <div class="rk-success-step-num">3</div>
+        <div>Tap the <strong>attachment icon</strong>, locate the downloaded file, and attach it.</div>
+      </div>
+      <div class="rk-success-step">
+        <div class="rk-success-step-num">4</div>
+        <div>Tap <strong>Send</strong>. Your manager will import your availability into RosterKit.</div>
+      </div>
+    </div>
+    <button class="rk-btn-ghost" id="rk-reset-btn">↩ Edit &amp; Resubmit</button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="rk-footer">
+    <span>RosterKit &nbsp;·&nbsp; Staff Availability Form</span>
+    <span>No data leaves this page until you send the email</span>
+    <div class="rk-pbp" style="margin-top:8px">ProductivityByPhil</div>
+  </footer>
+
+  <!-- TOASTS -->
+  <div id="rk-toasts"></div>
+  </div>
+
+  <!-- ── MANAGER MODE ── -->
+  <div id="mode-manager" class="rk-mode">
+    <!-- HEADER -->
+  <header class="rk-header">
+    <div class="rk-brand">
+      <div class="rk-logo">📋</div>
+      <div>
+        <div class="rk-brand-name">RosterKit</div>
+        <div class="rk-brand-sub">Manager Mode</div>
+      </div>
+    </div>
+    <div id="rk-tier-badge" class="rk-free-badge" onclick="openPaywall('header')">Free — Upgrade ↑</div>
+  </header>
+
+  <!-- TABS -->
+  <div class="rk-tabs-wrap">
+    <div class="rk-tabs">
+      <button class="rk-tab active" data-tab="jobs"   onclick="switchTab('jobs')">
+        <span class="rk-tab-icon">💼</span> Jobs
+      </button>
+      <button class="rk-tab" data-tab="locations" onclick="switchTab('locations')">
+        <span class="rk-tab-icon">📍</span> Locations
+      </button>
+      <button class="rk-tab" data-tab="staff"  onclick="switchTab('staff')">
+        <span class="rk-tab-icon">👥</span> Staff
+      </button>
+      <button class="rk-tab" data-tab="import" onclick="switchTab('import')">
+        <span class="rk-tab-icon">📥</span> Import
+      </button>
+      <button class="rk-tab" data-tab="roster" onclick="switchTab('roster')">
+        <span class="rk-tab-icon">📅</span> Roster <span class="rk-tab-lock" id="roster-lock">🔒</span>
+      </button>
+      <button class="rk-tab" data-tab="export" onclick="switchTab('export')">
+        <span class="rk-tab-icon">📤</span> Export <span class="rk-tab-lock" id="export-lock">🔒</span>
+      </button>
+      <button class="rk-tab" data-tab="settings" onclick="switchTab('settings')">
+        <span class="rk-tab-icon">⚙️</span> Settings
+      </button>
+    </div>
+  </div>
+
+  <!-- ── JOBS PANEL ── -->
+  <div class="rk-panel active" id="panel-jobs">
+    <div class="rk-sec-head">
+      <div>
+        <div class="rk-sec-title">Job Types</div>
+        <div class="rk-sec-sub">Define the roles in your workplace</div>
+      </div>
+      <button class="rk-btn rk-btn-primary rk-btn-sm" onclick="openJobForm()">+ Add Job</button>
+    </div>
+
+    <div id="rk-jobs-limit-bar" class="rk-limit-bar">
+      <span class="rk-limit-label">Jobs used (free: 3 max)</span>
+      <span class="rk-limit-count" id="rk-jobs-count">0 / 3</span>
+    </div>
+
+    <div id="rk-jobs-list"></div>
+
+    <!-- Add/Edit Job Form -->
+    <div id="rk-job-form" class="rk-card" style="display:none; margin-top:14px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px;" id="rk-job-form-title">New Job</div>
+      <div class="rk-row">
+        <div class="rk-group">
+          <label class="rk-label" for="rk-job-name">Job Name <span class="rk-req">*</span></label>
+          <input class="rk-input" type="text" id="rk-job-name" placeholder="e.g. Driver" maxlength="60" />
+          <div class="rk-err" id="rk-job-name-err"></div>
+        </div>
+        <div class="rk-group">
+          <label class="rk-label" for="rk-job-rate">Hourly Rate (optional)</label>
+          <input class="rk-input" type="text" id="rk-job-rate" placeholder="e.g. 28.50" maxlength="10" inputmode="decimal" />
+        </div>
+      </div>
+      <div class="rk-group">
+        <label class="rk-label">Colour</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;" id="rk-colour-picker">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button class="rk-btn rk-btn-primary" onclick="saveJob()">Save Job</button>
+        <button class="rk-btn rk-btn-ghost"   onclick="closeJobForm()">Cancel</button>
+      </div>
+    </div>
+
+    <div id="rk-jobs-empty" class="rk-empty" style="display:none;">
+      <div class="rk-empty-icon">💼</div>
+      <div class="rk-empty-title">No jobs yet</div>
+      <div>Add your first job type to get started.</div>
+    </div>
+  </div>
+
+  <!-- ── LOCATIONS PANEL ── -->
+  <div class="rk-panel" id="panel-locations">
+    <div class="rk-sec-head">
+      <div>
+        <div class="rk-sec-title">Locations</div>
+        <div class="rk-sec-sub">Workplaces, sites or venues where staff are rostered</div>
+      </div>
+      <button class="rk-btn rk-btn-primary rk-btn-sm" onclick="openLocationForm()">+ Add</button>
+    </div>
+
+    <div id="rk-loc-limit-bar" class="rk-limit-bar">
+      <span class="rk-limit-label">Locations (free: 1 max)</span>
+      <span class="rk-limit-count" id="rk-loc-count">0 / 1</span>
+    </div>
+
+    <div id="rk-loc-list"></div>
+
+    <!-- Add/Edit Location Form -->
+    <div id="rk-loc-form" class="rk-card" style="display:none; margin-top:14px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px;" id="rk-loc-form-title">New Location</div>
+      <div class="rk-group">
+        <label class="rk-label" for="rk-loc-name">Location Name <span class="rk-req">*</span></label>
+        <input class="rk-input" type="text" id="rk-loc-name" placeholder="e.g. Main Street Store, Warehouse B" maxlength="80" />
+        <div class="rk-err" id="rk-loc-name-err"></div>
+      </div>
+      <div class="rk-group">
+        <label class="rk-label" for="rk-loc-address">Address (optional)</label>
+        <input class="rk-input" type="text" id="rk-loc-address" placeholder="e.g. 123 Main St, Melbourne VIC 3000" maxlength="150" />
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;">Shown in staff Calendar app when .ics is sent</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button class="rk-btn rk-btn-primary" onclick="saveLocation()">Save</button>
+        <button class="rk-btn rk-btn-ghost"   onclick="closeLocationForm()">Cancel</button>
+      </div>
+    </div>
+
+    <div id="rk-loc-empty" class="rk-empty" style="display:none;">
+      <div class="rk-empty-icon">📍</div>
+      <div class="rk-empty-title">No locations yet</div>
+      <div>Add at least one location to assign it to shifts in the Roster.</div>
+    </div>
+  </div>
+
+  <!-- ── STAFF PANEL ── -->
+  <div class="rk-panel" id="panel-staff">
+    <div class="rk-sec-head">
+      <div>
+        <div class="rk-sec-title">Staff</div>
+        <div class="rk-sec-sub">Your team members</div>
+      </div>
+      <button class="rk-btn rk-btn-primary rk-btn-sm" onclick="openStaffForm()">+ Add</button>
+    </div>
+
+    <div id="rk-staff-limit-bar" class="rk-limit-bar">
+      <span class="rk-limit-label">Staff added (free: 3 max)</span>
+      <span class="rk-limit-count" id="rk-staff-count">0 / 5</span>
+    </div>
+
+    <div id="rk-staff-list"></div>
+
+    <!-- Add/Edit Staff Form -->
+    <div id="rk-staff-form" class="rk-card" style="display:none; margin-top:14px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:14px;" id="rk-staff-form-title">New Staff Member</div>
+      <div class="rk-group">
+        <label class="rk-label" for="rk-sf-name">Full Name <span class="rk-req">*</span></label>
+        <input class="rk-input" type="text" id="rk-sf-name" placeholder="e.g. Alex Johnson" maxlength="100" autocomplete="name" />
+        <div class="rk-err" id="rk-sf-name-err"></div>
+      </div>
+      <div class="rk-row">
+        <div class="rk-group">
+          <label class="rk-label" for="rk-sf-email">Email <span class="rk-req">*</span></label>
+          <input class="rk-input" type="email" id="rk-sf-email" placeholder="alex@email.com" maxlength="150" inputmode="email" />
+          <div class="rk-err" id="rk-sf-email-err"></div>
+        </div>
+        <div class="rk-group">
+          <label class="rk-label" for="rk-sf-phone">Phone</label>
+          <input class="rk-input" type="tel" id="rk-sf-phone" placeholder="04XX XXX XXX" maxlength="20" inputmode="tel" />
+        </div>
+      </div>
+      <div class="rk-row">
+        <div class="rk-group">
+          <label class="rk-label" for="rk-sf-role">Role <span class="rk-req">*</span></label>
+          <input class="rk-input" type="text" id="rk-sf-role" placeholder="e.g. Driver" maxlength="100" />
+          <div class="rk-err" id="rk-sf-role-err"></div>
+        </div>
+        <div class="rk-group">
+          <label class="rk-label" for="rk-sf-basis">Employment</label>
+          <select class="rk-sel" id="rk-sf-basis">
+            <option value="">— Select —</option>
+            <option value="Full-time">Full-time</option>
+            <option value="Part-time">Part-time</option>
+            <option value="Casual">Casual</option>
+            <option value="Contractor">Contractor</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button class="rk-btn rk-btn-primary" onclick="saveStaff()">Save</button>
+        <button class="rk-btn rk-btn-ghost"   onclick="closeStaffForm()">Cancel</button>
+      </div>
+    </div>
+
+    <div id="rk-staff-empty" class="rk-empty" style="display:none;">
+      <div class="rk-empty-icon">👥</div>
+      <div class="rk-empty-title">No staff yet</div>
+      <div>Add team members or import their availability first.</div>
+    </div>
+  </div>
+
+  <!-- ── IMPORT PANEL ── -->
+  <div class="rk-panel" id="panel-import">
+    <div class="rk-sec-head">
+      <div>
+        <div class="rk-sec-title">Import Availability</div>
+        <div class="rk-sec-sub">Import .json files sent by staff</div>
+      </div>
+    </div>
+
+    <div class="rk-drop-zone" id="rk-drop-zone" onclick="$('rk-file-input').click()">
+      <div class="rk-drop-icon">📂</div>
+      <div class="rk-drop-title">Tap to select files</div>
+      <div class="rk-drop-sub">Select one or more rosterkit-avail-*.json files</div>
+    </div>
+    <input type="file" id="rk-file-input" accept=".json" multiple />
+
+    <div id="rk-import-log" class="rk-import-log"></div>
+
+    <div id="rk-import-empty" class="rk-empty" style="padding:24px 0 0;">
+      <div class="rk-empty-icon">📋</div>
+      <div class="rk-empty-title">No imports yet</div>
+      <div>Staff submit their availability using the Staff Availability Form, then email you the .json file.</div>
+    </div>
+  </div>
+
+  <!-- ── ROSTER PANEL ── -->
+  <div class="rk-panel" id="panel-roster">
+    <div class="rk-sec-head">
+      <div>
+        <div class="rk-sec-title">Roster Builder</div>
+        <div class="rk-sec-sub">Assign shifts for the week</div>
+      </div>
+      <button class="rk-btn rk-btn-primary rk-btn-sm" id="rk-send-ics-btn" onclick="sendICS()">📅 Send .ics</button>
+    </div>
+
+    <div class="rk-week-nav">
+      <button class="rk-week-btn" onclick="changeWeek(-1)">‹</button>
+      <div class="rk-week-label" id="rk-week-label">Week of —</div>
+      <button class="rk-week-btn" onclick="changeWeek(1)">›</button>
+    </div>
+
+    <div class="rk-roster-wrap">
+      <table class="rk-roster-tbl" id="rk-roster-tbl">
+        <thead id="rk-roster-head"></thead>
+        <tbody id="rk-roster-body"></tbody>
+      </table>
+    </div>
+
+    <div id="rk-roster-empty" class="rk-empty" style="display:none;">
+      <div class="rk-empty-icon">📅</div>
+      <div class="rk-empty-title">No staff to roster</div>
+      <div>Add staff in the Staff tab first.</div>
+    </div>
+  </div>
+
+  <!-- ── EXPORT PANEL ── -->
+  <div class="rk-panel" id="panel-export">
+    <div class="rk-sec-head">
+      <div>
+        <div class="rk-sec-title">Export</div>
+        <div class="rk-sec-sub">Download or share the current roster</div>
+      </div>
+    </div>
+
+    <div class="rk-card" style="display:flex;flex-direction:column;gap:12px;">
+      <button class="rk-btn rk-btn-primary rk-btn-full" onclick="exportCSV()">
+        📊 Download as CSV
+      </button>
+      <button class="rk-btn rk-btn-ghost rk-btn-full" onclick="exportPrint()">
+        🖨 Print / Save as PDF
+      </button>
+      <button class="rk-btn rk-btn-ghost rk-btn-full" onclick="goToRosterICS()">
+        📅 Send Shifts to Staff (.ics)
+      </button>
+    </div>
+
+    <div class="rk-card" style="margin-top:14px; background:var(--accent-dim); border-color:rgba(91,127,255,.2);">
+      <div style="display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--text2);">
+        <span style="font-size:16px;flex-shrink:0;">ℹ️</span>
+        <span>Individual shift confirmations are sent from the <strong style="color:var(--text);cursor:pointer;" onclick="switchTab('roster')">Roster tab →</strong> using the <strong style="color:var(--text);">Send .ics</strong> button. Each staff member gets a personalised calendar file for their own shifts.</span>
+      </div>
+    </div>
+
+    <div class="rk-card" style="margin-top:14px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:4px;">Backup</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:14px;">Save a full backup of all your data.</div>
+      <button class="rk-btn rk-btn-ghost rk-btn-full" onclick="exportBackup()">
+        ☁️ Download Backup (.json)
+      </button>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS PANEL ── -->
+  <div class="rk-panel" id="panel-settings">
+    <div class="rk-sec-head">
+      <div>
+        <div class="rk-sec-title">Settings</div>
+        <div class="rk-sec-sub">Your manager profile and verification details</div>
+      </div>
+    </div>
+
+    <!-- Verification info card -->
+    <div class="rk-card" style="background:var(--accent-dim);border-color:rgba(91,127,255,.25);margin-bottom:16px;">
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:18px;flex-shrink:0;">🔐</span>
+        <div style="font-size:13px;color:var(--text2);line-height:1.6;">
+          <strong style="color:var(--text);display:block;margin-bottom:4px;">Roster Verification</strong>
+          Your name, email and roster code are embedded in every .ics file you send. Staff can verify a roster is genuinely from you by checking the sender email matches what you've registered here, and confirming the roster code matches the one you've shared with them in person or via a trusted channel.
+        </div>
+      </div>
+    </div>
+
+    <div class="rk-card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:16px;">Manager Profile</div>
+
+      <div class="rk-group">
+        <label class="rk-label" for="rk-set-name">Your Name <span class="rk-req">*</span></label>
+        <input class="rk-input" type="text" id="rk-set-name"
+          placeholder="e.g. Jordan Smith" maxlength="100" autocomplete="name" />
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;">Shown in .ics files sent to staff</div>
+      </div>
+
+      <div class="rk-group">
+        <label class="rk-label" for="rk-set-email">Your Email <span class="rk-req">*</span></label>
+        <input class="rk-input" type="email" id="rk-set-email"
+          placeholder="manager@yourworkplace.com" maxlength="150" inputmode="email" />
+        <div style="font-size:11px;color:var(--text3);margin-top:4px;">Staff verify the roster came from this address</div>
+      </div>
+
+      <div class="rk-group">
+        <label class="rk-label" for="rk-set-org">Organisation / Venue Name</label>
+        <input class="rk-input" type="text" id="rk-set-org"
+          placeholder="e.g. Acme Cleaning Services" maxlength="100" />
+      </div>
+    </div>
+
+    <div class="rk-card" style="margin-top:14px;">
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px;">Roster Code</div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:14px;line-height:1.6;">
+        A short code you share with staff out-of-band (verbally, on a noticeboard, or in a group chat). Every .ics you send includes this code — staff check it matches before accepting a shift.
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-end;">
+        <div class="rk-group" style="flex:1;margin-bottom:0;">
+          <label class="rk-label" for="rk-set-code">Roster Code</label>
+          <input class="rk-input" type="text" id="rk-set-code"
+            placeholder="e.g. ACME-4821" maxlength="20"
+            style="font-family:'JetBrains Mono',monospace;letter-spacing:.5px;text-transform:uppercase;" />
+        </div>
+        <button class="rk-btn rk-btn-ghost" onclick="generateCode()" style="margin-bottom:0;flex-shrink:0;">
+          Generate
+        </button>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px;">
+        Share this code with your team when they first join. Change it if a staff member leaves on bad terms or you suspect it has been shared outside your team.
+      </div>
+    </div>
+
+    <div class="rk-card" style="margin-top:14px;" id="rk-pin-settings-card">
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px;">Manager PIN</div>
+      <div id="rk-pin-status-text" style="font-size:13px;color:var(--text3);margin-bottom:14px;line-height:1.6;">
+        PIN protection is off. Anyone can access Manager mode.
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="rk-btn rk-btn-primary rk-btn-sm" id="rk-pin-action-btn" onclick="changePinFromSettings()">
+          Set PIN
+        </button>
+        <button class="rk-btn rk-btn-danger rk-btn-sm" id="rk-pin-remove-btn" onclick="removePinFromSettings()" style="display:none;">
+          Remove PIN
+        </button>
+      </div>
+    </div>
+
+    <button class="rk-btn rk-btn-primary rk-btn-full" onclick="saveSettings()" style="margin-top:16px;">
+      Save Settings
+    </button>
+
+    <div id="rk-settings-saved" style="display:none;text-align:center;margin-top:12px;font-size:13px;color:var(--green);">
+      ✓ Settings saved
+    </div>
+  </div>
+
+  <!-- ── PIN OVERLAY ── -->
+  <div id="rk-pin-overlay" style="display:none;position:fixed;inset:0;z-index:400;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px calc(40px + var(--safe-bottom));">
+
+    <!-- SET PIN screen -->
+    <div id="rk-pin-set" style="display:none;width:100%;max-width:340px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:16px;">🔐</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:8px;">Set Manager PIN</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:28px;line-height:1.6;">Create a 4-digit PIN to protect Manager mode. Staff won't be able to access roster data without it.</div>
+      <div id="rk-pin-dots-set" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
+        <div class="rk-pin-dot" id="rk-set-d0"></div>
+        <div class="rk-pin-dot" id="rk-set-d1"></div>
+        <div class="rk-pin-dot" id="rk-set-d2"></div>
+        <div class="rk-pin-dot" id="rk-set-d3"></div>
+      </div>
+      <div id="rk-pin-set-msg" style="font-size:13px;color:var(--text3);min-height:20px;margin-bottom:16px;"></div>
+      <div class="rk-pin-pad" id="rk-pad-set"></div>
+      <button class="rk-btn rk-btn-ghost" onclick="skipPinSetup()" style="margin-top:16px;width:100%;">Skip — don't protect with PIN</button>
+    </div>
+
+    <!-- CONFIRM PIN screen (shown after first entry) -->
+    <div id="rk-pin-confirm" style="display:none;width:100%;max-width:340px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:16px;">🔐</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:8px;">Confirm PIN</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:28px;">Enter your PIN again to confirm.</div>
+      <div id="rk-pin-dots-confirm" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
+        <div class="rk-pin-dot" id="rk-conf-d0"></div>
+        <div class="rk-pin-dot" id="rk-conf-d1"></div>
+        <div class="rk-pin-dot" id="rk-conf-d2"></div>
+        <div class="rk-pin-dot" id="rk-conf-d3"></div>
+      </div>
+      <div id="rk-pin-confirm-msg" style="font-size:13px;color:var(--red);min-height:20px;margin-bottom:16px;"></div>
+      <div class="rk-pin-pad" id="rk-pad-confirm"></div>
+    </div>
+
+    <!-- ENTER PIN screen -->
+    <div id="rk-pin-enter" style="display:none;width:100%;max-width:340px;text-align:center;">
+      <div style="font-size:40px;margin-bottom:16px;" id="rk-pin-lock-icon">🔐</div>
+      <div style="font-size:22px;font-weight:800;letter-spacing:-.4px;margin-bottom:8px;">Manager Mode</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:28px;" id="rk-pin-enter-sub">Enter your PIN to continue.</div>
+      <div id="rk-pin-dots-enter" style="display:flex;gap:14px;justify-content:center;margin-bottom:28px;">
+        <div class="rk-pin-dot" id="rk-ent-d0"></div>
+        <div class="rk-pin-dot" id="rk-ent-d1"></div>
+        <div class="rk-pin-dot" id="rk-ent-d2"></div>
+        <div class="rk-pin-dot" id="rk-ent-d3"></div>
+      </div>
+      <div id="rk-pin-enter-msg" style="font-size:13px;color:var(--red);min-height:20px;margin-bottom:16px;"></div>
+      <div class="rk-pin-pad" id="rk-pad-enter"></div>
+      <button id="rk-biometric-btn" class="rk-btn rk-btn-ghost" onclick="tryBiometric()" style="margin-top:16px;width:100%;display:none;">
+        Use Face ID / Touch ID
+      </button>
+    </div>
+  </div>
+
+  <!-- PAYWALL SHEET -->
+  <div class="rk-paywall" id="rk-paywall" onclick="closePaywallOutside(event)">
+    <div class="rk-paywall-sheet">
+      <div class="rk-paywall-handle"></div>
+      <h2 id="rk-paywall-heading">Unlock RosterKit Pro</h2>
+      <p class="rk-paywall-sub" id="rk-paywall-sub">One purchase. No subscription. Yours forever.</p>
+      <div class="rk-paywall-features">
+        <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">👥</span><div><strong>Unlimited staff, jobs & locations</strong><span>Free plan: 3 staff, 3 jobs, 1 location</span></div></div>
+        <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">📅</span><div><strong>Unlimited .ics sending</strong><span>Email shift confirmations to every staff member</span></div></div>
+        <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">📊</span><div><strong>PDF & CSV export</strong><span>Download or print your roster</span></div></div>
+        <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">☁️</span><div><strong>Scheduled iCloud backup</strong><span>Auto-backup on your chosen schedule</span></div></div>
+        <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">📆</span><div><strong>Multi-week planning</strong><span>Plan rosters weeks ahead</span></div></div>
+      </div>
+      <div class="rk-paywall-price">
+        <strong id="rk-iap-price">$14.99</strong><span> one-time</span>
+      </div>
+      <div class="rk-paywall-actions">
+        <button class="rk-btn rk-btn-primary rk-btn-full" onclick="purchasePro()">Unlock Pro</button>
+        <button class="rk-btn rk-btn-ghost rk-btn-full"   onclick="closePaywall()">Maybe Later</button>
+      </div>
+      <div class="rk-restore-link" onclick="restorePurchase()">Restore previous purchase</div>
+    </div>
+  </div>
+
+  <!-- TOASTS -->
+  <div id="rk-toasts"></div>
+
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);text-align:center;padding:16px 0 calc(24px + var(--safe-bottom));">ProductivityByPhil</div>
+  </div>
+
+  <!-- ── BOTTOM MODE SWITCHER ── -->
+  <nav class="rk-mode-bar" id="rk-mode-bar" style="display:none;">
+    <button class="rk-mode-btn active" id="btn-staff" onclick="switchMode('staff')">
+      <span class="rk-mode-btn-icon">👤</span>
+      <span class="rk-mode-btn-label">Availability</span>
+    </button>
+    <button class="rk-mode-btn" id="btn-manager" onclick="switchMode('manager')">
+      <span class="rk-mode-btn-icon">📅</span>
+      <span class="rk-mode-btn-label">Manager</span>
+    </button>
+  </nav>
+
+  <script>
+  // ── SHELL CONTROLLER ──
+  (function() {
+    'use strict';
+
+    const STORAGE_KEY = 'rk_shell';
+
+    function loadShell() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+    }
+    function saveShell(data) {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+    }
+
+    // ── MODE SWITCHER ──
+    window.switchMode = function(mode, force) {
+      if (mode === 'manager' && !force) {
+        // Gate on PIN if the manager PIN system is ready
+        if (typeof window.requireManagerPin === 'function') {
+          window.requireManagerPin(() => window.switchMode('manager', true));
+          return;
+        }
+      }
+      document.querySelectorAll('.rk-mode').forEach(el => el.classList.remove('active'));
+      document.getElementById('mode-' + mode)?.classList.add('active');
+      document.querySelectorAll('.rk-mode-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('btn-' + mode)?.classList.add('active');
+      const shell = loadShell(); shell.lastMode = mode; saveShell(shell);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // ── ONBOARDING ──
+    window.selectRole = function(role) {
+      const shell = loadShell();
+      shell.onboardDone = true;
+      shell.lastMode    = role;
+      saveShell(shell);
+      hideOnboard();
+      switchMode(role);
+    };
+
+    window.skipOnboard = function() {
+      const shell = loadShell();
+      shell.onboardDone = true;
+      shell.lastMode    = 'staff';
+      saveShell(shell);
+      hideOnboard();
+      switchMode('staff');
+    };
+
+    function hideOnboard() {
+      document.getElementById('rk-onboard').style.display     = 'none';
+      document.getElementById('rk-mode-bar').style.display    = '';
+    }
+
+    // ── URL PARAM MODE (?mode=staff|manager) ──
+    function getModeFromURL() {
+      try {
+        const p = new URLSearchParams(window.location.search);
+        const m = p.get('mode');
+        return (m === 'staff' || m === 'manager') ? m : null;
+      } catch { return null; }
+    }
+
+    // ── BOOT ──
+    function boot() {
+      const shell   = loadShell();
+      const urlMode = getModeFromURL();
+
+      if (urlMode) {
+        // Deep link from home screen shortcut
+        hideOnboard();
+        switchMode(urlMode);
+        return;
+      }
+
+      if (shell.onboardDone) {
+        // Returning user — restore last mode
+        hideOnboard();
+        switchMode(shell.lastMode || 'staff');
+      } else {
+        // First launch — show onboarding
+        document.getElementById('rk-onboard').style.display = '';
+        document.getElementById('rk-mode-bar').style.display = 'none';
+        // Hide mode panels until role chosen
+        document.querySelectorAll('.rk-mode').forEach(el => el.classList.remove('active'));
+      }
+    }
+
+    // ── SERVICE WORKER ──
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(reg => console.log('[RosterKit] SW registered', reg.scope))
+        .catch(err => console.warn('[RosterKit] SW failed', err));
+    }
+
+    boot();
+  })();
+  </script>
+
+  <!-- ── STAFF SCRIPT ── -->
+  <script>
+  (() => {
+    'use strict';
+
+    // ── UTILITIES ──
+    function sanitize(str, maxLen) {
+      if (typeof str !== 'string') return '';
+      return str.replace(/[<>"'`]/g, '').trim().slice(0, maxLen || 200);
+    }
+    function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+    function isValidTime(t)  { return /^\d{2}:\d{2}$/.test(t); }
+    function $(id)           { return document.getElementById(id); }
+
+    // ── TOASTS ──
+    function toast(msg, type) {
+      const c = $('rk-toasts'); if (!c) return;
+      const t = document.createElement('div');
+      t.className = 'rk-toast ' + (type || 'info');
+      t.textContent = (type === 'success' ? '✓ ' : type === 'error' ? '✕ ' : '') + msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    // ── AVAILABILITY TABLE ──
+    const DAYS = [
+      { key:'Mon', label:'Monday'    },
+      { key:'Tue', label:'Tuesday'   },
+      { key:'Wed', label:'Wednesday' },
+      { key:'Thu', label:'Thursday'  },
+      { key:'Fri', label:'Friday'    },
+      { key:'Sat', label:'Saturday'  },
+      { key:'Sun', label:'Sunday'    }
+    ];
+
+    function buildTimeSelect(id, defaultVal) {
+      const sel = document.createElement('select');
+      sel.className = 'rk-tsel rk-time-sel'; sel.id = id;
+      for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          const val = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+          const opt = document.createElement('option');
+          opt.value = val; opt.textContent = val;
+          if (val === defaultVal) opt.selected = true;
+          sel.appendChild(opt);
+        }
+      }
+      return sel;
+    }
+
+    function buildStatusSelect(key) {
+      const sel = document.createElement('select');
+      sel.className = 'rk-tsel rk-status-sel'; sel.id = 'rk-status-' + key;
+      [
+        { value:'working', label:'Available'     },
+        { value:'off',     label:'Not Available' },
+        { value:'leave',   label:'On Leave'      }
+      ].forEach(({ value, label }) => {
+        const opt = document.createElement('option');
+        opt.value = value; opt.textContent = label;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', () => updateTimeVis(key));
+      return sel;
+    }
+
+    function updateTimeVis(key) {
+      const status  = $('rk-status-' + key).value;
+      const working = status === 'working';
+      $('rk-trow-' + key).style.display   = working ? '' : 'none';
+      $('rk-badge-' + key).style.display  = working ? 'none' : '';
+      const badge = $('rk-badge-' + key);
+      while (badge.firstChild) badge.removeChild(badge.firstChild);
+      if (!working) {
+        const span = document.createElement('span');
+        span.className = 'rk-st-badge ' + (status === 'leave' ? 'rk-st-leave' : 'rk-st-off');
+        span.textContent = status === 'leave' ? 'On Leave' : 'Not Available';
+        badge.appendChild(span);
+      }
+    }
+
+    function buildAvailabilityTable() {
+      const tbody = $('rk-avail-body'); if (!tbody) return;
+      DAYS.forEach(day => {
+        const row = document.createElement('tr');
+
+        // Day
+        const dc = document.createElement('td');
+        const dn = document.createElement('div'); dn.className = 'rk-day-name'; dn.textContent = day.label;
+        const da = document.createElement('div'); da.className = 'rk-day-abbr'; da.textContent = day.key;
+        dc.appendChild(dn); dc.appendChild(da);
+
+        // Status
+        const sc = document.createElement('td');
+        sc.appendChild(buildStatusSelect(day.key));
+
+        // Hours (start → end)
+        const hc   = document.createElement('td');
+        const trow = document.createElement('div'); trow.className = 'rk-time-cell'; trow.id = 'rk-trow-' + day.key;
+        const sep  = document.createElement('span'); sep.className = 'rk-time-sep'; sep.textContent = '→';
+        trow.appendChild(buildTimeSelect('rk-start-' + day.key, '09:00'));
+        trow.appendChild(sep);
+        trow.appendChild(buildTimeSelect('rk-end-'   + day.key, '17:00'));
+        const badge = document.createElement('div'); badge.id = 'rk-badge-' + day.key; badge.style.display = 'none';
+        hc.appendChild(trow); hc.appendChild(badge);
+
+        row.appendChild(dc); row.appendChild(sc); row.appendChild(hc);
+        tbody.appendChild(row);
+      });
+    }
+
+    // ── VALIDATION ──
+    function validate() {
+      let ok = true;
+      const checks = [
+        { id:'rk-manager-email', errId:'rk-manager-email-err', msg:"Enter your manager's email",    test: isValidEmail },
+        { id:'rk-name',          errId:'rk-name-err',          msg:'Full name is required',         test: v => v.length > 0 },
+        { id:'rk-email',         errId:'rk-email-err',         msg:'Valid email address required',  test: isValidEmail },
+        { id:'rk-role',          errId:'rk-role-err',          msg:'Your role/position is required',test: v => v.length > 0 },
+        { id:'rk-basis',         errId:'rk-basis-err',         msg:'Please select employment type', test: v => v.length > 0 }
+      ];
+      checks.forEach(c => {
+        const el = $(c.id); const errEl = $(c.errId);
+        const v  = el.value.trim();
+        const fail = !v || (c.test && !c.test(v));
+        el.classList.toggle('error', fail);
+        errEl.textContent = fail ? c.msg : '';
+        if (fail) ok = false;
+      });
+      if (!ok) {
+        const first = document.querySelector('.rk-input.error, .rk-sel.error');
+        if (first) first.scrollIntoView({ behavior:'smooth', block:'center' });
+      }
+      return ok;
+    }
+
+    // ── PAYLOAD ──
+    function buildPayload() {
+      const av = {};
+      DAYS.forEach(day => {
+        const type = $('rk-status-' + day.key).value;
+        const s    = $('rk-start-' + day.key)?.value || '';
+        const e    = $('rk-end-'   + day.key)?.value || '';
+        av[day.key] = {
+          type,
+          start: (type === 'working' && isValidTime(s)) ? s : '',
+          end:   (type === 'working' && isValidTime(e)) ? e : ''
+        };
+      });
+      return {
+        _schema:        'rosterkit-avail-v1',
+        _type:          'staff-availability',
+        _generated:     new Date().toISOString(),
+        memberName:     sanitize($('rk-name').value, 100),
+        email:          sanitize($('rk-email').value, 150),
+        phone:          sanitize($('rk-phone').value, 20),
+        role:           sanitize($('rk-role').value, 100),
+        employmentType: $('rk-basis').value,
+        hourlyRate:     sanitize($('rk-rate').value, 10),
+        notes:          sanitize($('rk-notes').value, 200),
+        availability:   av
+      };
+    }
+
+    // ── FILE HELPERS ──
+    function makeFilename(name) {
+      const slug = (name || 'team-member')
+        .replace(/\s+/g,'-').toLowerCase().replace(/[^a-z0-9-]/g,'');
+      return 'rosterkit-avail-' + slug + '-' + new Date().toISOString().slice(0,10) + '.json';
+    }
+
+    function downloadFile(payload, filename) {
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+
+    function openEmail(managerEmail, memberName, filename) {
+      const subj = encodeURIComponent('RosterKit Availability — ' + memberName);
+      const body = encodeURIComponent(
+        'Hi,\n\nPlease find my weekly availability attached as:\n    ' + filename +
+        '\n\nTo import it into RosterKit:\n    Manager Mode → Import Availability → select the attached file\n\n' +
+        'Submitted by: ' + memberName + '\nSubmitted at: ' + new Date().toLocaleString() +
+        '\n\n— Sent via RosterKit Staff Availability Form'
+      );
+      window.location.href = 'mailto:' + encodeURIComponent(managerEmail) + '?subject=' + subj + '&body=' + body;
+    }
+
+    // ── SUBMIT ──
+    function setBtn(loading) {
+      const btn = $('rk-submit-btn');
+      btn.disabled = loading;
+      while (btn.firstChild) btn.removeChild(btn.firstChild);
+      const ic = document.createElement('span');
+      const lb = document.createElement('span');
+      ic.textContent = loading ? '⏳' : '📎';
+      lb.textContent = loading ? 'Preparing…' : 'Download & Open Email';
+      btn.appendChild(ic); btn.appendChild(lb);
+    }
+
+    function handleSubmit() {
+      if (!validate()) { toast('Please fix the highlighted fields', 'error'); return; }
+      setBtn(true);
+      const payload  = buildPayload();
+      const filename = makeFilename(payload.memberName);
+      const manager  = sanitize($('rk-manager-email').value, 150);
+      try {
+        downloadFile(payload, filename);
+        setTimeout(() => openEmail(manager, payload.memberName, filename), 400);
+        $('rk-form-area').style.display = 'none';
+        $('rk-success').classList.add('open');
+        $('rk-filename-display').textContent = filename;
+        toast('File downloaded', 'success');
+      } catch {
+        setBtn(false);
+        toast('Something went wrong. Try again.', 'error');
+      }
+    }
+
+    // ── SHARE ──
+    async function handleShare() {
+      if (!navigator.canShare) { toast('Sharing not supported on this device', 'error'); return; }
+      const payload  = buildPayload();
+      const filename = makeFilename(payload.memberName);
+      const file     = new File([JSON.stringify(payload, null, 2)], filename, { type:'application/json' });
+      try {
+        await navigator.share({ title:'RosterKit Availability', files:[file] });
+        toast('Shared successfully', 'success');
+      } catch {
+        toast('Share cancelled', 'error');
+      }
+    }
+
+    // ── RESET ──
+    function handleReset() {
+      $('rk-success').classList.remove('open');
+      $('rk-form-area').style.display = '';
+      setBtn(false);
+    }
+
+    // ── BOOT ──
+    function init() {
+      buildAvailabilityTable();
+      $('rk-submit-btn')?.addEventListener('click', handleSubmit);
+      $('rk-share')?.addEventListener('click', handleShare);
+      $('rk-reset-btn')?.addEventListener('click', handleReset);
+    }
+
+    document.readyState === 'loading'
+      ? document.addEventListener('DOMContentLoaded', init)
+      : init();
+  })();
+  
+  </script>
+
+  <!-- ── MANAGER SCRIPT ── -->
+  <script>
+  (() => {
+    'use strict';
+
+    // ── CONSTANTS ──
+    const FREE_JOBS_MAX  = 3;
+    const FREE_STAFF_MAX      = 3;
+    const FREE_LOCATIONS_MAX  = 1;
+    const FREE_ICS_MAX   = 1;
+    const TRIAL_DAYS     = 7;
+    const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    const DAY_LABELS = { Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday', Sat:'Saturday', Sun:'Sunday' };
+    const JOB_COLOURS = ['#5b7fff','#3ecf8e','#f5a623','#f56565','#a78bfa','#22d3ee','#fb923c','#e879f9','#4ade80','#facc15'];
+
+    // ── STATE ──
+    let state = {
+      isPro:             false,
+      trialStartedAt:    null,   // ISO string — set on first launch, never reset
+      jobs:              [],     // {id, name, rate, colour}
+      locations:         [],     // {id, name, address}
+      staff:             [],     // {id, name, email, phone, role, basis, availability}
+      roster:            {},     // weekKey -> staffId -> {Mon: {jobId, locationId}|'off', ...}
+      importLog:         [],
+      currentWeekOffset: 0,
+      settings: {
+        managerName:  '',   // shown in .ics and email
+        managerEmail: '',   // staff verify sender against this
+        rosterCode:   '',   // short code staff verify out-of-band
+        orgName:      '',   // workplace / venue name
+        pinHash:      '',   // SHA-256 hash of manager PIN (never store raw PIN)
+        pinEnabled:   false,
+        biometricEnabled: false
+      }
+    };
+    let editingJobId   = null;
+    let editingStaffId = null;
+    let editingLocId   = null;
+    let selectedColour = JOB_COLOURS[0];
+
+    // ── PERSISTENCE ──
+    function save()  { try { localStorage.setItem('rosterkit_state', JSON.stringify(state)); } catch {} }
+    function load()  {
+      try {
+        const raw = localStorage.getItem('rosterkit_state');
+        if (raw) state = { ...state, ...JSON.parse(raw) };
+      } catch {}
+      // Seed trial on very first launch
+      if (!state.trialStartedAt) {
+        state.trialStartedAt = new Date().toISOString();
+        save();
+      }
+    }
+
+    // ── TRIAL HELPERS ──
+    function trialDaysRemaining() {
+      if (!state.trialStartedAt) return 0;
+      const ms      = Date.now() - new Date(state.trialStartedAt).getTime();
+      const elapsed = Math.floor(ms / (1000 * 60 * 60 * 24));
+      return Math.max(0, TRIAL_DAYS - elapsed);
+    }
+    function isInTrial()     { return !state.isPro && trialDaysRemaining() > 0; }
+    function isProOrTrial()  { return state.isPro || isInTrial(); }
+
+    // ── UTILS ──
+    function uid()      { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+    function esc(s)     { return String(s||'').replace(/[<>"'&]/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c])); }
+    function sanitize(s,n){ return String(s||'').replace(/[<>"']/g,'').replace(/`/g,'').trim().slice(0,n||200); }
+    function isEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+    function $(id)      { return document.getElementById(id); }
+
+    function toast(msg, type) {
+      const c = $('rk-toasts'); if (!c) return;
+      const t = document.createElement('div');
+      t.className = 'rk-toast ' + (type||'info');
+      t.textContent = (type==='success'?'✓ ':type==='error'?'✕ ':'') + msg;
+      c.appendChild(t); setTimeout(() => t.remove(), 3500);
+    }
+
+    // ── WEEK HELPERS ──
+    function getWeekStart(offset) {
+      const d = new Date();
+      const day = d.getDay();
+      const diff = (day === 0 ? -6 : 1 - day);
+      d.setDate(d.getDate() + diff + offset * 7);
+      d.setHours(0,0,0,0);
+      return d;
+    }
+    function weekKey(offset) {
+      const d = getWeekStart(offset);
+      return d.toISOString().slice(0,10);
+    }
+    function formatWeekLabel(offset) {
+      const s = getWeekStart(offset);
+      const e = new Date(s); e.setDate(e.getDate() + 6);
+      const fmt = d => d.getDate() + ' ' + d.toLocaleString('default',{month:'short'});
+      return fmt(s) + ' — ' + fmt(e) + ' ' + e.getFullYear();
+    }
+    const FREE_WEEK_MIN = -1; // one week back on free
+    const FREE_WEEK_MAX =  1; // one week forward on free
+
+    window.changeWeek = function(dir) {
+      const next = state.currentWeekOffset + dir;
+      if (!isProOrTrial() && (next < FREE_WEEK_MIN || next > FREE_WEEK_MAX)) {
+        openPaywall('week'); return;
+      }
+      state.currentWeekOffset = next;
+      renderRoster();
+    };
+
+    // ── TABS ──
+    window.switchTab = function(tab) {
+      document.querySelectorAll('.rk-tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+      document.querySelectorAll('.rk-panel').forEach(p => p.classList.remove('active'));
+      $('panel-' + tab)?.classList.add('active');
+      if (tab === 'roster')   renderRoster();
+      if (tab === 'settings') loadSettingsUI();
+    };
+
+    // ── PRO / PAYWALL ──
+    window.openPaywall = function(source) {
+      // Update paywall heading based on trial state
+      const inTrial  = isInTrial();
+      const daysLeft = trialDaysRemaining();
+      const heading  = $('rk-paywall-heading');
+      const sub      = $('rk-paywall-sub');
+      if (heading && sub) {
+        if (inTrial) {
+          heading.textContent = daysLeft + ' trial day' + (daysLeft !== 1 ? 's' : '') + ' remaining';
+          sub.textContent     = 'Unlock Pro to keep full access after your trial ends. One purchase, no subscription.';
+        } else if (!state.isPro) {
+          heading.textContent = 'Unlock RosterKit Pro';
+          sub.textContent     = 'One purchase. No subscription. Yours forever.';
+        }
+      }
+      $('rk-paywall').classList.add('open');
+    };
+    window.closePaywall = function() {
+      $('rk-paywall').classList.remove('open');
+    };
+    window.closePaywallOutside = function(e) {
+      if (e.target === $('rk-paywall')) closePaywall();
+    };
+    window.purchasePro = function() {
+      // In production: call Capacitor IAP plugin here
+      // window.Capacitor?.Plugins?.InAppPurchases?.purchaseProduct({productId:'com.philvieyra.rosterkit.unlock'})
+      toast('Opening App Store purchase…', 'info');
+      // Simulate for UI demo:
+      setTimeout(() => { state.isPro = true; save(); updateProUI(); closePaywall(); toast('RosterKit Pro unlocked!', 'success'); }, 800);
+    };
+    window.restorePurchase = function() {
+      toast('Checking previous purchase…', 'info');
+      setTimeout(() => toast('No previous purchase found', 'error'), 1200);
+    };
+
+    function updateProUI() {
+      const badge   = $('rk-tier-badge');
+      const inTrial = isInTrial();
+      const daysLeft = trialDaysRemaining();
+
+      if (state.isPro) {
+        badge.textContent = 'Pro ✓';
+        badge.className   = 'rk-pro-badge';
+        badge.onclick     = null;
+      } else if (inTrial) {
+        badge.textContent = 'Trial — ' + daysLeft + 'd left';
+        badge.className   = 'rk-pro-badge';
+        badge.style.color         = 'var(--amber)';
+        badge.style.borderColor   = 'rgba(245,166,35,.3)';
+        badge.style.background    = 'var(--amber-dim)';
+        badge.onclick = () => openPaywall('trial');
+      } else {
+        badge.textContent = 'Free — Upgrade ↑';
+        badge.className   = 'rk-free-badge';
+        badge.style.color       = '';
+        badge.style.borderColor = '';
+        badge.style.background  = '';
+        badge.onclick = () => openPaywall('header');
+      }
+
+      const unlocked = isProOrTrial();
+      $('roster-lock').style.display = unlocked ? 'none' : '';
+      $('export-lock').style.display = unlocked ? 'none' : '';
+      $('rk-jobs-limit-bar').style.display  = unlocked ? 'none' : '';
+      $('rk-staff-limit-bar').style.display = unlocked ? 'none' : '';
+      const locBar = $('rk-loc-limit-bar');
+      if (locBar) locBar.style.display = unlocked ? 'none' : '';
+    }
+
+    // ── COLOUR PICKER ──
+    function buildColourPicker() {
+      const wrap = $('rk-colour-picker'); if (!wrap) return;
+      wrap.innerHTML = '';
+      JOB_COLOURS.forEach(c => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.style.cssText = `width:28px;height:28px;border-radius:50%;background:${c};border:3px solid ${c===selectedColour?'#fff':'transparent'};cursor:pointer;transition:border-color .15s;`;
+        btn.onclick = () => { selectedColour = c; buildColourPicker(); };
+        wrap.appendChild(btn);
+      });
+    }
+
+    // ── LOCATIONS ──
+    window.openLocationForm = function(id) {
+      if (!isProOrTrial() && !id && state.locations.length >= FREE_LOCATIONS_MAX) { openPaywall('locations'); return; }
+      editingLocId = id || null;
+      const loc = id ? state.locations.find(l => l.id === id) : null;
+      $('rk-loc-name').value    = loc?.name    || '';
+      $('rk-loc-address').value = loc?.address || '';
+      $('rk-loc-name-err').textContent = '';
+      $('rk-loc-form-title').textContent = id ? 'Edit Location' : 'New Location';
+      $('rk-loc-form').style.display = '';
+      $('rk-loc-name').focus();
+    };
+    window.closeLocationForm = function() { $('rk-loc-form').style.display = 'none'; editingLocId = null; };
+    window.saveLocation = function() {
+      const name = sanitize($('rk-loc-name').value, 80);
+      if (!name) { $('rk-loc-name-err').textContent = 'Location name is required'; return; }
+      const data = { name, address: sanitize($('rk-loc-address').value, 150) };
+      if (editingLocId) {
+        const l = state.locations.find(l => l.id === editingLocId);
+        if (l) Object.assign(l, data);
+      } else {
+        state.locations.push({ id: uid(), ...data });
+      }
+      save(); closeLocationForm(); renderLocations(); toast('Location saved', 'success');
+    };
+    window.deleteLocation = function(id) {
+      state.locations = state.locations.filter(l => l.id !== id);
+      save(); renderLocations(); toast('Location removed', 'info');
+    };
+
+    function renderLocations() {
+      const list  = $('rk-loc-list');  if (!list) return;
+      const empty = $('rk-loc-empty');
+      const count = $('rk-loc-count');
+      if (!count) return;
+      const used  = state.locations.length;
+      count.textContent = isProOrTrial() ? used + ' location' + (used !== 1 ? 's' : '') : used + ' / ' + FREE_LOCATIONS_MAX;
+      count.className   = 'rk-limit-count' + (used >= FREE_LOCATIONS_MAX && !isProOrTrial() ? ' full' : '');
+      if (!state.locations.length) { list.innerHTML = ''; if (empty) empty.style.display = ''; return; }
+      if (empty) empty.style.display = 'none';
+      list.innerHTML = state.locations.map(l => `
+        <div class="rk-loc-item">
+          <span class="rk-loc-icon">📍</span>
+          <div class="rk-loc-info">
+            <div class="rk-loc-name">${esc(l.name)}</div>
+            ${l.address ? `<div class="rk-loc-addr">${esc(l.address)}</div>` : '<div class="rk-loc-addr" style="font-style:italic">No address set</div>'}
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="rk-btn rk-btn-ghost rk-btn-sm" onclick="openLocationForm('${l.id}')">Edit</button>
+            <button class="rk-btn rk-btn-danger rk-btn-sm" onclick="deleteLocation('${l.id}')">✕</button>
+          </div>
+        </div>`).join('');
+    }
+
+    // ── JOBS ──
+    window.openJobForm = function(id) {
+      if (!isProOrTrial() && !id && state.jobs.length >= FREE_JOBS_MAX) { openPaywall('jobs'); return; }
+      editingJobId = id || null;
+      const job = id ? state.jobs.find(j => j.id === id) : null;
+      $('rk-job-name').value  = job?.name  || '';
+      $('rk-job-rate').value  = job?.rate  || '';
+      selectedColour          = job?.colour || JOB_COLOURS[state.jobs.length % JOB_COLOURS.length];
+      $('rk-job-form-title').textContent = id ? 'Edit Job' : 'New Job';
+      $('rk-job-name-err').textContent   = '';
+      buildColourPicker();
+      $('rk-job-form').style.display = '';
+      $('rk-job-name').focus();
+    };
+    window.closeJobForm = function() { $('rk-job-form').style.display = 'none'; editingJobId = null; };
+    window.saveJob = function() {
+      const name = sanitize($('rk-job-name').value, 60);
+      if (!name) { $('rk-job-name-err').textContent = 'Job name is required'; return; }
+      if (editingJobId) {
+        const j = state.jobs.find(j => j.id === editingJobId);
+        if (j) { j.name = name; j.rate = sanitize($('rk-job-rate').value,10); j.colour = selectedColour; }
+      } else {
+        state.jobs.push({ id:uid(), name, rate:sanitize($('rk-job-rate').value,10), colour:selectedColour });
+      }
+      save(); closeJobForm(); renderJobs(); toast('Job saved', 'success');
+    };
+    window.deleteJob = function(id) {
+      state.jobs = state.jobs.filter(j => j.id !== id);
+      save(); renderJobs(); toast('Job removed', 'info');
+    };
+
+    function renderJobs() {
+      const list  = $('rk-jobs-list');
+      const empty = $('rk-jobs-empty');
+      const count = $('rk-jobs-count');
+      const used  = state.jobs.length;
+      count.textContent = isProOrTrial() ? used + ' jobs' : used + ' / ' + FREE_JOBS_MAX;
+      count.className   = 'rk-limit-count' + (used >= FREE_JOBS_MAX && !isProOrTrial() ? ' full' : used >= FREE_JOBS_MAX - 1 && !isProOrTrial() ? ' warn' : '');
+
+      if (!state.jobs.length) { list.innerHTML=''; empty.style.display=''; return; }
+      empty.style.display = 'none';
+      list.innerHTML = state.jobs.map(j => `
+        <div class="rk-job-item">
+          <div class="rk-job-dot" style="background:${esc(j.colour)}"></div>
+          <div class="rk-job-info">
+            <div class="rk-job-name">${esc(j.name)}</div>
+            <div class="rk-job-meta">${j.rate ? '$' + esc(j.rate) + '/hr' : 'Rate not set'}</div>
+          </div>
+          <div class="rk-job-actions">
+            <button class="rk-btn rk-btn-ghost rk-btn-sm" onclick="openJobForm('${j.id}')">Edit</button>
+            <button class="rk-btn rk-btn-danger rk-btn-sm" onclick="deleteJob('${j.id}')">✕</button>
+          </div>
+        </div>`).join('');
+    }
+
+    // ── STAFF ──
+    window.openStaffForm = function(id) {
+      if (!isProOrTrial() && !id && state.staff.length >= FREE_STAFF_MAX) { openPaywall('staff'); return; }
+      editingStaffId = id || null;
+      const s = id ? state.staff.find(m => m.id === id) : null;
+      $('rk-sf-name').value  = s?.name  || '';
+      $('rk-sf-email').value = s?.email || '';
+      $('rk-sf-phone').value = s?.phone || '';
+      $('rk-sf-role').value  = s?.role  || '';
+      $('rk-sf-basis').value = s?.basis || '';
+      $('rk-staff-form-title').textContent = id ? 'Edit Staff Member' : 'New Staff Member';
+      ['rk-sf-name-err','rk-sf-email-err','rk-sf-role-err'].forEach(id => $(id).textContent = '');
+      $('rk-staff-form').style.display = '';
+      $('rk-sf-name').focus();
+    };
+    window.closeStaffForm = function() { $('rk-staff-form').style.display = 'none'; editingStaffId = null; };
+    window.saveStaff = function() {
+      let ok = true;
+      const name  = sanitize($('rk-sf-name').value, 100);
+      const email = sanitize($('rk-sf-email').value, 150);
+      const role  = sanitize($('rk-sf-role').value, 100);
+      if (!name)         { $('rk-sf-name-err').textContent  = 'Name required';          ok = false; }
+      if (!isEmail(email)){ $('rk-sf-email-err').textContent = 'Valid email required';   ok = false; }
+      if (!role)         { $('rk-sf-role-err').textContent  = 'Role required';           ok = false; }
+      if (!ok) return;
+      const data = { name, email, role,
+        phone: sanitize($('rk-sf-phone').value, 20),
+        basis: $('rk-sf-basis').value
+      };
+      if (editingStaffId) {
+        const m = state.staff.find(m => m.id === editingStaffId);
+        if (m) Object.assign(m, data);
+      } else {
+        state.staff.push({ id:uid(), availability:null, ...data });
+      }
+      save(); closeStaffForm(); renderStaff(); toast('Staff saved', 'success');
+    };
+    window.deleteStaff = function(id) {
+      state.staff = state.staff.filter(m => m.id !== id);
+      save(); renderStaff(); toast('Staff removed', 'info');
+    };
+
+    function initials(name) {
+      return name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    }
+
+    function renderStaff() {
+      const list  = $('rk-staff-list');
+      const empty = $('rk-staff-empty');
+      const count = $('rk-staff-count');
+      const used  = state.staff.length;
+      count.textContent = isProOrTrial() ? used + ' staff' : used + ' / ' + FREE_STAFF_MAX;
+      count.className   = 'rk-limit-count' + (used >= FREE_STAFF_MAX && !isProOrTrial() ? ' full' : used >= FREE_STAFF_MAX - 1 && !isProOrTrial() ? ' warn' : '');
+
+      if (!state.staff.length) { list.innerHTML=''; empty.style.display=''; return; }
+      empty.style.display = 'none';
+      list.innerHTML = state.staff.map(m => `
+        <div class="rk-staff-item">
+          <div class="rk-avatar">${esc(initials(m.name))}</div>
+          <div class="rk-staff-info">
+            <div class="rk-staff-name">${esc(m.name)}</div>
+            <div class="rk-staff-meta">${esc(m.email)}</div>
+            <div class="rk-staff-role">${esc(m.role)}${m.basis ? ' · ' + esc(m.basis) : ''}</div>
+            ${m.availability ? '<div class="rk-avail-imported">✓ Availability imported</div>' : ''}
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="rk-btn rk-btn-ghost rk-btn-sm" onclick="openStaffForm('${m.id}')">Edit</button>
+            <button class="rk-btn rk-btn-danger rk-btn-sm" onclick="deleteStaff('${m.id}')">✕</button>
+          </div>
+        </div>`).join('');
+    }
+
+    // ── IMPORT ──
+    function handleFiles(files) {
+      if (!files.length) return;
+      $('rk-import-empty').style.display = 'none';
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          try {
+            const data = JSON.parse(e.target.result);
+            if (data._schema !== 'rosterkit-avail-v1') throw new Error('Not a RosterKit availability file');
+            const name  = data.memberName || 'Unknown';
+            const email = data.email      || '';
+            // Upsert staff
+            let member = state.staff.find(m => m.email === email);
+            if (!member) {
+              if (!isProOrTrial() && state.staff.length >= FREE_STAFF_MAX) {
+                addImportLog(false, file.name, name, 'Staff limit reached — upgrade to Pro');
+                return;
+              }
+              member = { id:uid(), name, email, phone:data.phone||'', role:data.role||'', basis:data.employmentType||'', availability:null };
+              state.staff.push(member);
+            }
+            member.availability = data.availability;
+            member.name  = data.memberName || member.name;
+            member.role  = data.role       || member.role;
+            member.basis = data.employmentType || member.basis;
+            save(); renderStaff();
+            addImportLog(true, file.name, name, Object.keys(data.availability||{}).length + ' days');
+            toast(name + ' imported', 'success');
+          } catch (err) {
+            addImportLog(false, file.name, file.name, err.message);
+            toast('Import failed: ' + file.name, 'error');
+          }
+        };
+        reader.readAsText(file);
+      });
+    }
+
+    function addImportLog(success, filename, name, detail) {
+      const log = $('rk-import-log');
+      const row = document.createElement('div');
+      row.className = 'rk-import-row ' + (success ? 'success' : 'error');
+      row.innerHTML = `
+        <span class="rk-import-icon">${success ? '✓' : '✕'}</span>
+        <span class="rk-import-name">${esc(name)}</span>
+        <span class="rk-import-detail">${esc(detail)}</span>`;
+      log.prepend(row);
+    }
+
+    // ── ROSTER ──
+    function renderRoster() {
+      $('rk-week-label').textContent = formatWeekLabel(state.currentWeekOffset);
+      const wk    = weekKey(state.currentWeekOffset);
+      const head  = $('rk-roster-head');
+      const body  = $('rk-roster-body');
+      const empty = $('rk-roster-empty');
+
+      if (!state.roster[wk]) state.roster[wk] = {};
+
+      if (!state.staff.length) {
+        $('rk-roster-tbl').style.display = 'none';
+        empty.style.display = '';
+        return;
+      }
+      $('rk-roster-tbl').style.display = '';
+      empty.style.display = 'none';
+
+      // Header
+      head.innerHTML = '<tr><th>Staff</th>' + DAYS.map(d => `<th>${d}</th>`).join('') + '</tr>';
+
+      // Body
+      body.innerHTML = '';
+      state.staff.forEach(m => {
+        const rosterRow = state.roster[wk][m.id] || {};
+        const tr = document.createElement('tr');
+
+        // Name cell
+        const nameTd = document.createElement('td');
+        nameTd.innerHTML = `<div class="rk-cell-name">${esc(m.name)}</div><div class="rk-cell-role">${esc(m.role)}</div>`;
+        tr.appendChild(nameTd);
+
+        // Day cells
+        DAYS.forEach(day => {
+          const td  = document.createElement('td');
+          const sel = document.createElement('select');
+          sel.className = 'rk-shift-sel';
+
+          // Availability hint
+          const avail     = m.availability?.[day];
+          const availType = avail?.type || 'none';
+          const cellData  = rosterRow[day] || { jobId:'off', locationId:'' };
+          // Handle legacy string format
+          const savedJobId = typeof cellData === 'string' ? cellData : cellData.jobId || 'off';
+          const savedLocId = typeof cellData === 'string' ? '' : cellData.locationId || '';
+
+          // Job options
+          const offOpt = document.createElement('option');
+          offOpt.value = 'off'; offOpt.textContent = '—';
+          sel.appendChild(offOpt);
+          state.jobs.forEach(j => {
+            const opt = document.createElement('option');
+            opt.value = j.id; opt.textContent = j.name;
+            sel.appendChild(opt);
+          });
+          sel.value = savedJobId;
+          if (availType === 'working') sel.classList.add('avail');
+          if (availType === 'off')     sel.classList.add('unavail');
+
+          // Location selector
+          const locSel = document.createElement('select');
+          locSel.className = 'rk-loc-sel' + (savedLocId ? ' has-loc' : '');
+          const noLocOpt = document.createElement('option');
+          noLocOpt.value = ''; noLocOpt.textContent = '— location —';
+          locSel.appendChild(noLocOpt);
+          state.locations.forEach(l => {
+            const opt = document.createElement('option');
+            opt.value = l.id; opt.textContent = l.name;
+            locSel.appendChild(opt);
+          });
+          locSel.value = savedLocId;
+          // Hide location selector if no job assigned or no locations defined
+          locSel.style.display = (savedJobId === 'off' || !state.locations.length) ? 'none' : '';
+
+          // Availability dot
+          const dot = document.createElement('span');
+          dot.className = 'rk-avail-dot ' + ({working:'dot-avail',off:'dot-unavail',leave:'dot-leave'}[availType]||'dot-none');
+
+          const cell = document.createElement('div');
+          cell.className = 'rk-shift-cell';
+          const topRow = document.createElement('div');
+          topRow.style.cssText = 'display:flex;align-items:center;gap:4px;';
+          topRow.appendChild(dot);
+          topRow.appendChild(sel);
+          cell.appendChild(topRow);
+          cell.appendChild(locSel);
+          td.appendChild(cell);
+
+          function saveCell() {
+            if (!state.roster[wk]) state.roster[wk] = {};
+            if (!state.roster[wk][m.id]) state.roster[wk][m.id] = {};
+            state.roster[wk][m.id][day] = { jobId: sel.value, locationId: locSel.value };
+            save();
+          }
+          sel.addEventListener('change', () => {
+            locSel.style.display = (sel.value === 'off' || !state.locations.length) ? 'none' : '';
+            if (sel.value === 'off') { locSel.value = ''; locSel.classList.remove('has-loc'); }
+            saveCell();
+          });
+          locSel.addEventListener('change', () => {
+            locSel.classList.toggle('has-loc', !!locSel.value);
+            saveCell();
+          });
+          tr.appendChild(td);
+        });
+        body.appendChild(tr);
+      });
+    }
+
+    // ── .ICS GENERATION ──
+    window.sendICS = function() {
+      if (!isProOrTrial() && state.staff.length > FREE_ICS_MAX) { openPaywall('ics'); return; }
+      const wk      = weekKey(state.currentWeekOffset);
+      const roster  = state.roster[wk] || {};
+      const wkStart = getWeekStart(state.currentWeekOffset);
+      let sent = 0;
+
+      state.staff.forEach(m => {
+        const shifts = roster[m.id] || {};
+        const lines  = [];
+
+        DAYS.forEach((day, i) => {
+          const cellData  = shifts[day];
+          const jobId     = typeof cellData === 'string' ? cellData : cellData?.jobId || 'off';
+          const locationId = typeof cellData === 'string' ? '' : cellData?.locationId || '';
+          if (!jobId || jobId === 'off') return;
+          const job = state.jobs.find(j => j.id === jobId);
+          if (!job) return;
+          const loc = locationId ? state.locations.find(l => l.id === locationId) : null;
+
+          const shiftDate = new Date(wkStart);
+          shiftDate.setDate(shiftDate.getDate() + i);
+          const avail     = m.availability?.[day];
+          const startH    = avail?.start || '09:00';
+          const endH      = avail?.end   || '17:00';
+
+          function icsDate(base, timeStr) {
+            const [h,min] = timeStr.split(':').map(Number);
+            const d = new Date(base);
+            d.setHours(h, min, 0, 0);
+            return d.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
+          }
+
+          lines.push([
+            'BEGIN:VEVENT',
+            'DTSTART:' + icsDate(shiftDate, startH),
+            'DTEND:'   + icsDate(shiftDate, endH),
+            'SUMMARY:' + job.name + (loc ? ' @ ' + loc.name : '') + ' Shift',
+            'ORGANIZER;CN=' + (state.settings?.managerName || 'Manager') + ':mailto:' + (state.settings?.managerEmail || 'noreply@rosterkit'),
+            'DESCRIPTION:' + job.name + (job.rate ? ' @ $' + job.rate + '/hr' : '')
+              + (loc ? '\\nLocation: ' + loc.name + (loc.address ? ', ' + loc.address : '') : '')
+              + (state.settings?.orgName      ? '\\nOrganisation: ' + state.settings.orgName      : '')
+              + (state.settings?.managerName  ? '\\nRostered by: '  + state.settings.managerName  : '')
+              + (state.settings?.managerEmail ? '\\nVerify sender: ' + state.settings.managerEmail : '')
+              + (state.settings?.rosterCode   ? '\\nRoster Code: '   + state.settings.rosterCode + ' — confirm this matches your manager\'s code before accepting.' : '')
+              + '\\n\\nScheduled via RosterKit',
+            ...(loc && loc.address ? ['LOCATION:' + loc.address] : loc ? ['LOCATION:' + loc.name] : []),
+            'STATUS:CONFIRMED',
+            'END:VEVENT'
+          ].join('\r\n'));
+        });
+
+        if (!lines.length) return;
+
+        const ics = [
+          'BEGIN:VCALENDAR', 'VERSION:2.0',
+          'PRODID:-//RosterKit//RosterKit//EN',
+          'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
+          ...lines,
+          'END:VCALENDAR'
+        ].join('\r\n');
+
+        const blob = new Blob([ics], { type:'text/calendar' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        a.href = url;
+        a.download = 'rosterkit-' + m.name.replace(/\s+/g,'-').toLowerCase() + '-' + wk + '.ics';
+        document.body.appendChild(a); a.click();
+        document.body.removeChild(a); URL.revokeObjectURL(url);
+
+        // Open email
+        setTimeout(() => {
+          const subj = encodeURIComponent('Your Shifts — ' + formatWeekLabel(state.currentWeekOffset));
+          const mgr   = state.settings || {};
+          const verif = [
+            mgr.managerName  ? 'From: '        + mgr.managerName  : '',
+            mgr.managerEmail ? 'Sender email: ' + mgr.managerEmail + ' (verify this matches the From address above)' : '',
+            mgr.rosterCode   ? 'Roster Code: '  + mgr.rosterCode  + ' — confirm this matches the code your manager shared with you in person.' : '',
+            mgr.orgName      ? 'Organisation: ' + mgr.orgName     : ''
+          ].filter(Boolean).join('\n');
+          const body = encodeURIComponent(
+            'Hi ' + m.name + ',\n\n'
+            + 'Your shift schedule for ' + formatWeekLabel(state.currentWeekOffset) + ' is attached.\n\n'
+            + 'Open the .ics file to add your shifts to your Calendar app.\n\n'
+            + (verif ? '── Verification ──\n' + verif + '\n\nIf any of the above does not match what your manager told you, do not accept this roster.\n\n' : '')
+            + '— Sent via RosterKit'
+          );
+          window.open('mailto:' + encodeURIComponent(m.email) + '?subject=' + subj + '&body=' + body);
+        }, 300 * (sent + 1));
+        sent++;
+      });
+
+      if (sent) toast(sent + ' .ics file' + (sent>1?'s':'') + ' ready to send', 'success');
+      else toast('No shifts assigned for this week', 'error');
+    };
+
+    // ── EXPORT ──
+    window.exportCSV = function() {
+      if (!isProOrTrial()) { openPaywall('export'); return; }
+      const wk = weekKey(state.currentWeekOffset);
+      const roster = state.roster[wk] || {};
+      const header = ['Staff', 'Role', ...DAYS.flatMap(d => [d + ' Job', d + ' Location'])].join(',');
+      const rows   = state.staff.map(m => {
+        const shifts = roster[m.id] || {};
+        const cells  = DAYS.flatMap(d => {
+          const cellData   = shifts[d];
+          const jobId      = typeof cellData === 'string' ? cellData : cellData?.jobId || 'off';
+          const locationId = typeof cellData === 'string' ? '' : cellData?.locationId || '';
+          const jobName    = (!jobId || jobId === 'off') ? '—' : state.jobs.find(j => j.id === jobId)?.name || '—';
+          const locName    = locationId ? state.locations.find(l => l.id === locationId)?.name || '—' : '—';
+          return [jobName, locName];
+        });
+        return ['"' + m.name + '"', '"' + m.role + '"', ...cells.map(c => '"'+c+'"')].join(',');
+      });
+      const csv  = [header, ...rows].join('\n');
+      const blob = new Blob([csv], { type:'text/csv' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = 'rosterkit-' + wk + '.csv';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+      toast('CSV downloaded', 'success');
+    };
+
+    window.exportPrint = function() {
+      if (!isProOrTrial()) { openPaywall('export'); return; }
+      window.print();
+    };
+
+    window.goToRosterICS = function() {
+      switchTab('roster');
+      setTimeout(() => {
+        const btn = $('rk-send-ics-btn');
+        if (btn) { btn.scrollIntoView({ behavior:'smooth', block:'center' }); btn.style.boxShadow = '0 0 0 3px var(--accent)'; setTimeout(() => btn.style.boxShadow = '', 1500); }
+      }, 150);
+    };
+
+    window.exportBackup = function() {
+      if (!isProOrTrial()) { openPaywall('backup'); return; }
+      const payload = { _schema:'rosterkit-backup-v1', _generated:new Date().toISOString(), ...state };
+      const blob    = new Blob([JSON.stringify(payload,null,2)], { type:'application/json' });
+      const url     = URL.createObjectURL(blob);
+      const a       = document.createElement('a');
+      a.href = url; a.download = 'rosterkit-backup-' + new Date().toISOString().slice(0,10) + '.json';
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+      toast('Backup downloaded', 'success');
+    };
+
+    // ── DRAG & DROP ──
+    function initDropZone() {
+      const zone = $('rk-drop-zone');
+      const inp  = $('rk-file-input');
+      if (!zone || !inp) return;
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+      zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
+      zone.addEventListener('drop', e => {
+        e.preventDefault(); zone.classList.remove('drag-over');
+        handleFiles(e.dataTransfer.files);
+      });
+      inp.addEventListener('change', () => { handleFiles(inp.files); inp.value=''; });
+    }
+
+    // ── PIN SYSTEM ──
+
+    // SHA-256 via Web Crypto — returns hex string
+    async function sha256(str) {
+      const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+
+    // PIN session — unlocked for this app session, locks on next open
+    let pinSessionUnlocked = false;
+    let pinSetBuffer       = '';
+    let pinConfirmBuffer   = '';
+    let pinEnterBuffer     = '';
+    let pinAttempts        = 0;
+    const PIN_MAX_ATTEMPTS = 5;
+
+    // Build a numeric pin pad into a container element
+    function buildPinPad(containerId, onDigit, onDelete) {
+      const pad = document.getElementById(containerId);
+      if (!pad) return;
+      pad.innerHTML = '';
+      const keys = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
+      keys.forEach(k => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        if (k === '') {
+          btn.className = 'rk-pin-key empty';
+        } else if (k === '⌫') {
+          btn.className = 'rk-pin-key del';
+          btn.textContent = '⌫';
+          btn.addEventListener('click', onDelete);
+        } else {
+          btn.className = 'rk-pin-key';
+          btn.textContent = k;
+          btn.addEventListener('click', () => onDigit(k));
+        }
+        pad.appendChild(btn);
+      });
+    }
+
+    function updateDots(prefix, value) {
+      for (let i = 0; i < 4; i++) {
+        const d = document.getElementById(prefix + i);
+        if (!d) continue;
+        d.classList.remove('filled','error');
+        if (i < value.length) d.classList.add('filled');
+      }
+    }
+
+    function flashError(prefix) {
+      for (let i = 0; i < 4; i++) {
+        const d = document.getElementById(prefix + i);
+        if (d) { d.classList.add('error'); setTimeout(() => d.classList.remove('error','filled'), 600); }
+      }
+    }
+
+    // ── SHOW / HIDE OVERLAY ──
+    function showPinOverlay(screen) {
+      const overlay = document.getElementById('rk-pin-overlay');
+      overlay.style.display = 'flex';
+      ['rk-pin-set','rk-pin-confirm','rk-pin-enter'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = id === screen ? '' : 'none';
+      });
+    }
+
+    function hidePinOverlay() {
+      const overlay = document.getElementById('rk-pin-overlay');
+      overlay.style.display = 'none';
+    }
+
+    // ── SET PIN FLOW ──
+    function startPinSetup() {
+      pinSetBuffer = '';
+      updateDots('rk-set-d', '');
+      document.getElementById('rk-pin-set-msg').textContent = '';
+      buildPinPad('rk-pad-set',
+        digit => {
+          if (pinSetBuffer.length >= 4) return;
+          pinSetBuffer += digit;
+          updateDots('rk-set-d', pinSetBuffer);
+          if (pinSetBuffer.length === 4) {
+            setTimeout(() => {
+              pinConfirmBuffer = '';
+              updateDots('rk-conf-d', '');
+              document.getElementById('rk-pin-confirm-msg').textContent = '';
+              showPinOverlay('rk-pin-confirm');
+            }, 200);
+          }
+        },
+        () => { pinSetBuffer = pinSetBuffer.slice(0,-1); updateDots('rk-set-d', pinSetBuffer); }
+      );
+      showPinOverlay('rk-pin-set');
+    }
+
+    buildPinPad('rk-pad-confirm',
+      digit => {
+        if (pinConfirmBuffer.length >= 4) return;
+        pinConfirmBuffer += digit;
+        updateDots('rk-conf-d', pinConfirmBuffer);
+        if (pinConfirmBuffer.length === 4) {
+          if (pinConfirmBuffer === pinSetBuffer) {
+            sha256(pinConfirmBuffer).then(hash => {
+              state.settings.pinHash    = hash;
+              state.settings.pinEnabled = true;
+              save();
+              pinSessionUnlocked = true;
+              hidePinOverlay();
+              loadSettingsUI();
+              toast('PIN set — Manager mode is now protected', 'success');
+            });
+          } else {
+            flashError('rk-conf-d');
+            document.getElementById('rk-pin-confirm-msg').textContent = "PINs don't match. Try again.";
+            setTimeout(() => {
+              pinSetBuffer = ''; pinConfirmBuffer = '';
+              updateDots('rk-set-d', '');
+              showPinOverlay('rk-pin-set');
+            }, 800);
+          }
+        }
+      },
+      () => { pinConfirmBuffer = pinConfirmBuffer.slice(0,-1); updateDots('rk-conf-d', pinConfirmBuffer); }
+    );
+
+    window.skipPinSetup = function() {
+      state.settings.pinEnabled = false;
+      save();
+      pinSessionUnlocked = true;
+      hidePinOverlay();
+      toast('PIN protection skipped', 'info');
+    };
+
+    // ── ENTER PIN FLOW ──
+    function startPinEntry(onSuccess) {
+      pinEnterBuffer = '';
+      pinAttempts    = 0;
+      updateDots('rk-ent-d', '');
+      document.getElementById('rk-pin-enter-msg').textContent = '';
+
+      // Show biometric button if enabled and available
+      const bioBtn = document.getElementById('rk-biometric-btn');
+      if (bioBtn) bioBtn.style.display = state.settings.biometricEnabled ? '' : 'none';
+
+      buildPinPad('rk-pad-enter',
+        digit => {
+          if (pinEnterBuffer.length >= 4) return;
+          pinEnterBuffer += digit;
+          updateDots('rk-ent-d', pinEnterBuffer);
+          if (pinEnterBuffer.length === 4) {
+            sha256(pinEnterBuffer).then(hash => {
+              if (hash === state.settings.pinHash) {
+                pinSessionUnlocked = true;
+                hidePinOverlay();
+                onSuccess && onSuccess();
+              } else {
+                pinAttempts++;
+                flashError('rk-ent-d');
+                const remaining = PIN_MAX_ATTEMPTS - pinAttempts;
+                if (remaining <= 0) {
+                  document.getElementById('rk-pin-enter-msg').textContent = 'Too many attempts. Try again later.';
+                  setTimeout(() => hidePinOverlay(), 2000);
+                } else {
+                  document.getElementById('rk-pin-enter-msg').textContent =
+                    'Incorrect PIN. ' + remaining + ' attempt' + (remaining !== 1 ? 's' : '') + ' remaining.';
+                }
+                setTimeout(() => { pinEnterBuffer = ''; updateDots('rk-ent-d', ''); }, 600);
+              }
+            });
+          }
+        },
+        () => { pinEnterBuffer = pinEnterBuffer.slice(0,-1); updateDots('rk-ent-d', pinEnterBuffer); }
+      );
+      showPinOverlay('rk-pin-enter');
+    }
+
+    // ── BIOMETRIC ──
+    window.tryBiometric = async function() {
+      try {
+        // Web Authentication API — available in WKWebView on iOS 14+
+        const cred = await navigator.credentials.get({
+          publicKey: {
+            challenge: crypto.getRandomValues(new Uint8Array(32)),
+            userVerification: 'required',
+            timeout: 30000
+          }
+        });
+        if (cred) {
+          pinSessionUnlocked = true;
+          hidePinOverlay();
+          toast('Authenticated', 'success');
+        }
+      } catch (err) {
+        // Fall back silently to PIN
+        document.getElementById('rk-pin-enter-msg').textContent = 'Biometric failed. Use your PIN.';
+      }
+    };
+
+    // ── MANAGER MODE GATE — called from shell switchMode ──
+    window.requireManagerPin = function(onSuccess) {
+      // Pass through immediately if PIN not enabled or not yet set
+      if (!state.settings.pinEnabled || !state.settings.pinHash) { onSuccess && onSuccess(); return; }
+      // Already unlocked this session
+      if (pinSessionUnlocked) { onSuccess && onSuccess(); return; }
+      // PIN is set — require entry
+      startPinEntry(onSuccess);
+    };
+
+    // ── CHANGE / REMOVE PIN (from Settings tab) ──
+    window.changePinFromSettings = function() {
+      if (!state.settings.pinEnabled || !state.settings.pinHash) {
+        startPinSetup(); return;
+      }
+      // Must verify existing PIN first
+      startPinEntry(() => {
+        state.settings.pinHash    = '';
+        state.settings.pinEnabled = false;
+        save();
+        startPinSetup();
+      });
+    };
+
+    window.removePinFromSettings = function() {
+      if (!state.settings.pinEnabled) return;
+      startPinEntry(() => {
+        state.settings.pinHash    = '';
+        state.settings.pinEnabled = false;
+        pinSessionUnlocked = false;
+        save();
+        loadSettingsUI();
+        toast('PIN removed', 'info');
+      });
+    };
+
+    // ── SETTINGS ──
+    function loadSettingsUI() {
+      const s = state.settings || {};
+      const n = $('rk-set-name');  if (n) n.value = s.managerName  || '';
+      const e = $('rk-set-email'); if (e) e.value = s.managerEmail || '';
+      const o = $('rk-set-org');   if (o) o.value = s.orgName      || '';
+      const c = $('rk-set-code');  if (c) c.value = s.rosterCode   || '';
+
+      // Update PIN status UI
+      const statusTxt   = $('rk-pin-status-text');
+      const actionBtn   = $('rk-pin-action-btn');
+      const removeBtn   = $('rk-pin-remove-btn');
+      if (statusTxt && actionBtn && removeBtn) {
+        if (s.pinEnabled && s.pinHash) {
+          statusTxt.textContent    = 'PIN protection is on. Manager mode is secured.';
+          statusTxt.style.color    = 'var(--green)';
+          actionBtn.textContent    = 'Change PIN';
+          removeBtn.style.display  = '';
+        } else {
+          statusTxt.textContent    = 'PIN protection is off. Anyone can access Manager mode.';
+          statusTxt.style.color    = 'var(--text3)';
+          actionBtn.textContent    = 'Set PIN';
+          removeBtn.style.display  = 'none';
+        }
+      }
+    }
+
+    window.saveSettings = function() {
+      const name  = sanitize($('rk-set-name')?.value  || '', 100);
+      const email = sanitize($('rk-set-email')?.value || '', 150);
+      const org   = sanitize($('rk-set-org')?.value   || '', 100);
+      const code  = sanitize($('rk-set-code')?.value  || '', 20).toUpperCase();
+      state.settings = { managerName: name, managerEmail: email, orgName: org, rosterCode: code };
+      save();
+      const saved = $('rk-settings-saved');
+      if (saved) { saved.style.display = ''; setTimeout(() => saved.style.display = 'none', 2500); }
+      toast('Settings saved', 'success');
+    };
+
+    window.generateCode = function() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      const prefix = (state.settings?.orgName || 'RK').replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,4) || 'RK';
+      const num    = Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
+      const code   = prefix + '-' + num;
+      const el     = $('rk-set-code');
+      if (el) { el.value = code; el.style.borderColor = 'var(--accent)'; setTimeout(() => el.style.borderColor = '', 1000); }
+    };
+
+    // ── INIT ──
+    function init() {
+      load();
+      updateProUI();
+      loadSettingsUI();
+      renderJobs();
+      renderLocations();
+      renderStaff();
+      renderRoster();
+      initDropZone();
+      $('rk-import-empty').style.display = '';
+    }
+
+    init();
+  })();
+  
+  </script>
+
+</body>
+</html>
