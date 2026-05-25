@@ -511,7 +511,7 @@
         <span class="rk-tab-icon">👥</span> Staff
       </button>
       <button class="rk-tab" data-tab="import" onclick="switchTab('import')">
-        <span class="rk-tab-icon">📥</span> Import
+        <span class="rk-tab-icon">📥</span> Import <span class="rk-tab-lock" id="import-lock">🔒</span>
       </button>
       <button class="rk-tab" data-tab="roster" onclick="switchTab('roster')">
         <span class="rk-tab-icon">📅</span> Roster <span class="rk-tab-lock" id="roster-lock">🔒</span>
@@ -630,7 +630,7 @@
 
     <div id="rk-staff-limit-bar" class="rk-limit-bar">
       <span class="rk-limit-label">Staff added (free: 3 max)</span>
-      <span class="rk-limit-count" id="rk-staff-count">0 / 5</span>
+      <span class="rk-limit-count" id="rk-staff-count">0 / 3</span>
     </div>
 
     <div id="rk-staff-list"></div>
@@ -693,7 +693,7 @@
       </div>
     </div>
 
-    <div class="rk-drop-zone" id="rk-drop-zone" onclick="$('rk-file-input').click()">
+    <div class="rk-drop-zone" id="rk-drop-zone" onclick="tryImport()">
       <div class="rk-drop-icon">📂</div>
       <div class="rk-drop-title">Tap to select files</div>
       <div class="rk-drop-sub">Select one or more rosterkit-avail-*.json files</div>
@@ -927,6 +927,7 @@
       <div class="rk-paywall-features">
         <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">👥</span><div><strong>Unlimited staff, jobs & locations</strong><span>Free plan: 3 staff, 3 jobs, 1 location</span></div></div>
         <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">📅</span><div><strong>Unlimited .ics sending</strong><span>Email shift confirmations to every staff member</span></div></div>
+        <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">📥</span><div><strong>Import staff availability</strong><span>Import .json files sent by your team</span></div></div>
         <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">📊</span><div><strong>PDF & CSV export</strong><span>Download or print your roster</span></div></div>
         <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">☁️</span><div><strong>Scheduled iCloud backup</strong><span>Auto-backup on your chosen schedule</span></div></div>
         <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">📆</span><div><strong>Multi-week planning</strong><span>Plan rosters weeks ahead</span></div></div>
@@ -1130,6 +1131,7 @@
       const unlocked = isProOrTrial();
       $('roster-lock').style.display = unlocked ? 'none' : '';
       $('export-lock').style.display = unlocked ? 'none' : '';
+      $('import-lock').style.display = unlocked ? 'none' : '';
       $('rk-jobs-limit-bar').style.display  = unlocked ? 'none' : '';
       $('rk-staff-limit-bar').style.display = unlocked ? 'none' : '';
       const locBar = $('rk-loc-limit-bar');
@@ -1331,7 +1333,13 @@
     }
 
     // ── IMPORT ──
+    window.tryImport = function() {
+      if (!isProOrTrial()) { openPaywall('import'); return; }
+      $('rk-file-input').click();
+    };
+
     function handleFiles(files) {
+      if (!isProOrTrial()) { openPaywall('import'); return; }
       if (!files.length) return;
       $('rk-import-empty').style.display = 'none';
       Array.from(files).forEach(file => {
@@ -1918,7 +1926,7 @@
       const email = sanitize($('rk-set-email')?.value || '', 150);
       const org   = sanitize($('rk-set-org')?.value   || '', 100);
       const code  = sanitize($('rk-set-code')?.value  || '', 20).toUpperCase();
-      state.settings = { managerName: name, managerEmail: email, orgName: org, rosterCode: code };
+      state.settings = { ...state.settings, managerName: name, managerEmail: email, orgName: org, rosterCode: code };
       save();
       const saved = $('rk-settings-saved');
       if (saved) { saved.style.display = ''; setTimeout(() => saved.style.display = 'none', 2500); }
