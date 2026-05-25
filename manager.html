@@ -1953,6 +1953,38 @@
       if (el) { el.value = code; el.style.borderColor = 'var(--accent)'; setTimeout(() => el.style.borderColor = '', 1000); }
     };
 
+    // ── DEMO SEED (fires once when storage is empty) ──
+    function seedDemoIfEmpty() {
+      if (state.jobs.length > 0) return;
+      state.jobs = [
+        { id:'j1', name:'Barista',      rate:'28.50', colour:'#5b7fff' },
+        { id:'j2', name:'Kitchen Hand', rate:'26.00', colour:'#3ecf8e' },
+        { id:'j3', name:'Floor Staff',  rate:'27.50', colour:'#f5a623' }
+      ];
+      state.locations = [
+        { id:'l1', name:'Main Street', address:'123 Main St' },
+        { id:'l2', name:'Airport',     address:'Terminal 2'  }
+      ];
+      state.staff = [
+        { id:'s1', name:'Alex Johnson',  email:'alex@email.com',   phone:'0411 111 111', role:'Barista',      basis:'Part-time' },
+        { id:'s2', name:'Sam Williams',  email:'sam@email.com',    phone:'0422 222 222', role:'Kitchen Hand', basis:'Casual'    },
+        { id:'s3', name:'Jordan Lee',    email:'jordan@email.com', phone:'0433 333 333', role:'Floor Staff',  basis:'Full-time' },
+        { id:'s4', name:'Taylor Brown',  email:'taylor@email.com', phone:'0444 444 444', role:'Barista',      basis:'Casual'    },
+        { id:'s5', name:'Morgan Davis',  email:'morgan@email.com', phone:'0455 555 555', role:'Kitchen Hand', basis:'Part-time' }
+      ];
+      const wk = weekKey(0);
+      state.roster[wk] = {
+        s1: { Mon:{jobId:'j1',locationId:'l1'}, Tue:{jobId:'j1',locationId:'l1'}, Wed:'off',               Thu:{jobId:'j1',locationId:'l2'}, Fri:{jobId:'j1',locationId:'l1'}, Sat:'off',               Sun:'off' },
+        s2: { Mon:{jobId:'j2',locationId:'l1'}, Tue:'off',               Wed:{jobId:'j2',locationId:'l1'}, Thu:{jobId:'j2',locationId:'l1'}, Fri:'off',               Sat:{jobId:'j2',locationId:'l2'}, Sun:'off' },
+        s3: { Mon:{jobId:'j3',locationId:'l1'}, Tue:{jobId:'j3',locationId:'l1'}, Wed:{jobId:'j3',locationId:'l1'}, Thu:{jobId:'j3',locationId:'l1'}, Fri:{jobId:'j3',locationId:'l1'}, Sat:'off', Sun:'off' },
+        s4: { Mon:'off',               Tue:{jobId:'j1',locationId:'l2'}, Wed:{jobId:'j1',locationId:'l2'}, Thu:'off',               Fri:{jobId:'j1',locationId:'l2'}, Sat:{jobId:'j1',locationId:'l1'}, Sun:{jobId:'j1',locationId:'l1'} },
+        s5: { Mon:'off',               Tue:{jobId:'j2',locationId:'l1'}, Wed:'off',               Thu:{jobId:'j2',locationId:'l2'}, Fri:{jobId:'j2',locationId:'l2'}, Sat:{jobId:'j2',locationId:'l1'}, Sun:'off' }
+      };
+      state.settings.orgName     = 'The Coffee Collective';
+      state.settings.managerName = 'Phil';
+      save();
+    }
+
     // ── INIT ──
     function init() {
       load();
