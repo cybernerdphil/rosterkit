@@ -228,11 +228,11 @@
     .rk-loc-sel {
       background: var(--bg3); border: 1px solid var(--border);
       border-radius: 6px; color: var(--text2);
-      font-family: 'Manrope', sans-serif; font-size: 11px;
-      padding: 4px 6px; outline: none;
-      width: 100%; min-width: 70px;
+      font-family: 'Manrope', sans-serif; font-size: 13px;
+      padding: 6px 8px; outline: none;
+      width: 100%;
       -webkit-appearance: none; appearance: none;
-      cursor: pointer; min-height: 28px;
+      cursor: pointer; min-height: 40px;
       transition: border-color .15s;
       font-style: italic;
     }
@@ -248,47 +248,53 @@
       width: fit-content;
     }
 
-    /* ── ROSTER GRID ── */
-    .rk-roster-wrap {
-      overflow-x: auto; -webkit-overflow-scrolling: touch;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
-    }
-    .rk-roster-tbl {
-      width: 100%; border-collapse: collapse;
-      min-width: 480px; background: var(--bg2);
-    }
-    .rk-roster-tbl th {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px; font-weight: 500; color: var(--text3);
-      letter-spacing: .8px; text-transform: uppercase;
-      padding: 10px 12px; border-bottom: 1px solid var(--border);
-      white-space: nowrap; text-align: center; background: var(--bg3);
-    }
-    .rk-roster-tbl th:first-child { text-align: left; position: sticky; left: 0; z-index: 2; }
-    .rk-roster-tbl td {
-      padding: 8px; border-bottom: 1px solid var(--border);
-      border-right: 1px solid var(--border); vertical-align: middle;
-      text-align: center; min-width: 80px;
-    }
-    .rk-roster-tbl td:first-child {
-      text-align: left; position: sticky; left: 0; z-index: 1;
-      background: var(--bg2); min-width: 120px; padding: 8px 12px;
-    }
-    .rk-roster-tbl tr:last-child td { border-bottom: none; }
-    .rk-roster-tbl td:last-child { border-right: none; }
+    /* ── ROSTER CARDS ── */
+    .rk-roster-cards { display: flex; flex-direction: column; gap: 12px; }
 
-    .rk-cell-name  { font-size: 13px; font-weight: 600; color: var(--text); }
-    .rk-cell-role  { font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+    .rk-rc {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .rk-rc-hdr {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+    .rk-cell-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .rk-cell-role { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
+
+    .rk-rc-day {
+      display: grid;
+      grid-template-columns: 42px 1fr 1fr;
+      border-bottom: 1px solid var(--border);
+      min-height: 52px;
+    }
+    .rk-rc-day:last-child { border-bottom: none; }
+
+    .rk-rc-day-label {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 3px;
+      font-size: 10px; font-weight: 700; color: var(--text3);
+      font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+      border-right: 1px solid var(--border); padding: 6px 4px;
+    }
+    .rk-rc-job {
+      display: flex; align-items: center;
+      padding: 8px; border-right: 1px solid var(--border);
+    }
+    .rk-rc-loc {
+      display: flex; align-items: center;
+      padding: 8px;
+    }
 
     .rk-shift-sel {
       background: var(--bg3); border: 1px solid var(--border);
       border-radius: 6px; color: var(--text);
-      font-family: 'Manrope', sans-serif; font-size: 12px;
-      padding: 5px 6px; outline: none;
-      width: 100%; min-width: 70px;
+      font-family: 'Manrope', sans-serif; font-size: 13px;
+      padding: 6px 8px; outline: none;
+      width: 100%;
       -webkit-appearance: none; appearance: none;
-      cursor: pointer; min-height: 36px;
+      cursor: pointer; min-height: 40px;
       transition: border-color .15s;
     }
     .rk-shift-sel:focus { border-color: var(--accent); }
@@ -487,7 +493,7 @@
   <!-- HEADER -->
   <header class="rk-header">
     <div class="rk-brand">
-      <div class="rk-logo"><img src="./assets/Designer.png" alt="RosterKit" /></div>
+      <div class="rk-logo"><img src="./assets/logo.png" alt="RosterKit" /></div>
       <div>
         <div class="rk-brand-name">RosterKit</div>
         <div class="rk-brand-sub">Manager Mode</div>
@@ -723,12 +729,7 @@
       <button class="rk-week-btn" onclick="changeWeek(1)">›</button>
     </div>
 
-    <div class="rk-roster-wrap">
-      <table class="rk-roster-tbl" id="rk-roster-tbl">
-        <thead id="rk-roster-head"></thead>
-        <tbody id="rk-roster-body"></tbody>
-      </table>
-    </div>
+    <div class="rk-roster-cards" id="rk-roster-cards"></div>
 
     <div id="rk-roster-empty" class="rk-empty" style="display:none;">
       <div class="rk-empty-icon">📅</div>
@@ -946,7 +947,7 @@
   <!-- TOASTS -->
   <div id="rk-toasts"></div>
 
-  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);text-align:center;padding:16px 0 calc(24px + var(--safe-bottom));">ProductivityByPhil</div>
+  <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);text-align:center;padding:16px 0 calc(24px + var(--safe-bottom));">Philip Vieyra</div>
 
   <script>
   (() => {
@@ -957,7 +958,7 @@
     const FREE_STAFF_MAX      = 3;
     const FREE_LOCATIONS_MAX  = 1;
     const FREE_ICS_MAX   = 1;
-    const TRIAL_DAYS     = 7;
+    const TRIAL_DAYS     = 5;
     const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
     const DAY_LABELS = { Mon:'Monday', Tue:'Tuesday', Wed:'Wednesday', Thu:'Thursday', Fri:'Friday', Sat:'Saturday', Sun:'Sunday' };
     const JOB_COLOURS = ['#5b7fff','#3ecf8e','#f5a623','#f56565','#a78bfa','#22d3ee','#fb923c','#e879f9','#4ade80','#facc15'];
@@ -1394,51 +1395,61 @@
     function renderRoster() {
       $('rk-week-label').textContent = formatWeekLabel(state.currentWeekOffset);
       const wk    = weekKey(state.currentWeekOffset);
-      const head  = $('rk-roster-head');
-      const body  = $('rk-roster-body');
+      const cards = $('rk-roster-cards');
       const empty = $('rk-roster-empty');
 
       if (!state.roster[wk]) state.roster[wk] = {};
 
       if (!state.staff.length) {
-        $('rk-roster-tbl').style.display = 'none';
+        cards.style.display = 'none';
         empty.style.display = '';
         return;
       }
-      $('rk-roster-tbl').style.display = '';
+      cards.style.display = '';
       empty.style.display = 'none';
+      cards.innerHTML = '';
 
-      // Header
-      head.innerHTML = '<tr><th>Staff</th>' + DAYS.map(d => `<th>${d}</th>`).join('') + '</tr>';
-
-      // Body
-      body.innerHTML = '';
       state.staff.forEach(m => {
         const rosterRow = state.roster[wk][m.id] || {};
-        const tr = document.createElement('tr');
 
-        // Name cell
-        const nameTd = document.createElement('td');
-        nameTd.innerHTML = `<div class="rk-cell-name">${esc(m.name)}</div><div class="rk-cell-role">${esc(m.role)}</div>`;
-        tr.appendChild(nameTd);
+        // Card
+        const card = document.createElement('div');
+        card.className = 'rk-rc';
 
-        // Day cells
+        // Header
+        card.innerHTML = `<div class="rk-rc-hdr">
+          <div>
+            <div class="rk-cell-name">${esc(m.name)}</div>
+            <div class="rk-cell-role">${esc(m.role)}</div>
+          </div>
+        </div>`;
+
+        // Day rows
         DAYS.forEach(day => {
-          const td  = document.createElement('td');
-          const sel = document.createElement('select');
-          sel.className = 'rk-shift-sel';
-
-          // Availability hint
           const avail     = m.availability?.[day];
           const availType = avail?.type || 'none';
           const cellData  = rosterRow[day] || { jobId:'off', locationId:'' };
-          // Handle legacy string format
           const savedJobId = typeof cellData === 'string' ? cellData : cellData.jobId || 'off';
           const savedLocId = typeof cellData === 'string' ? '' : cellData.locationId || '';
 
-          // Job options
+          // Availability dot
+          const dotClass = {working:'dot-avail',off:'dot-unavail',leave:'dot-leave'}[availType] || 'dot-none';
+
+          // Day label cell
+          const dayDiv = document.createElement('div');
+          dayDiv.className = 'rk-rc-day';
+
+          const labelDiv = document.createElement('div');
+          labelDiv.className = 'rk-rc-day-label';
+          labelDiv.innerHTML = `${day}<span class="rk-avail-dot ${dotClass}" style="width:5px;height:5px;display:inline-block;border-radius:50%;"></span>`;
+
+          // Job select
+          const jobDiv = document.createElement('div');
+          jobDiv.className = 'rk-rc-job';
+          const sel = document.createElement('select');
+          sel.className = 'rk-shift-sel';
           const offOpt = document.createElement('option');
-          offOpt.value = 'off'; offOpt.textContent = '—';
+          offOpt.value = 'off'; offOpt.textContent = '— Off —';
           sel.appendChild(offOpt);
           state.jobs.forEach(j => {
             const opt = document.createElement('option');
@@ -1448,12 +1459,15 @@
           sel.value = savedJobId;
           if (availType === 'working') sel.classList.add('avail');
           if (availType === 'off')     sel.classList.add('unavail');
+          jobDiv.appendChild(sel);
 
-          // Location selector
+          // Location select
+          const locDiv = document.createElement('div');
+          locDiv.className = 'rk-rc-loc';
           const locSel = document.createElement('select');
           locSel.className = 'rk-loc-sel' + (savedLocId ? ' has-loc' : '');
           const noLocOpt = document.createElement('option');
-          noLocOpt.value = ''; noLocOpt.textContent = '— location —';
+          noLocOpt.value = ''; noLocOpt.textContent = '— Location —';
           locSel.appendChild(noLocOpt);
           state.locations.forEach(l => {
             const opt = document.createElement('option');
@@ -1461,22 +1475,8 @@
             locSel.appendChild(opt);
           });
           locSel.value = savedLocId;
-          // Hide location selector if no job assigned or no locations defined
           locSel.style.display = (savedJobId === 'off' || !state.locations.length) ? 'none' : '';
-
-          // Availability dot
-          const dot = document.createElement('span');
-          dot.className = 'rk-avail-dot ' + ({working:'dot-avail',off:'dot-unavail',leave:'dot-leave'}[availType]||'dot-none');
-
-          const cell = document.createElement('div');
-          cell.className = 'rk-shift-cell';
-          const topRow = document.createElement('div');
-          topRow.style.cssText = 'display:flex;align-items:center;gap:4px;';
-          topRow.appendChild(dot);
-          topRow.appendChild(sel);
-          cell.appendChild(topRow);
-          cell.appendChild(locSel);
-          td.appendChild(cell);
+          locDiv.appendChild(locSel);
 
           function saveCell() {
             if (!state.roster[wk]) state.roster[wk] = {};
@@ -1487,15 +1487,23 @@
           sel.addEventListener('change', () => {
             locSel.style.display = (sel.value === 'off' || !state.locations.length) ? 'none' : '';
             if (sel.value === 'off') { locSel.value = ''; locSel.classList.remove('has-loc'); }
+            sel.className = 'rk-shift-sel';
+            if (availType === 'working' && sel.value !== 'off') sel.classList.add('avail');
+            if (availType === 'off') sel.classList.add('unavail');
             saveCell();
           });
           locSel.addEventListener('change', () => {
             locSel.classList.toggle('has-loc', !!locSel.value);
             saveCell();
           });
-          tr.appendChild(td);
+
+          dayDiv.appendChild(labelDiv);
+          dayDiv.appendChild(jobDiv);
+          dayDiv.appendChild(locDiv);
+          card.appendChild(dayDiv);
         });
-        body.appendChild(tr);
+
+        cards.appendChild(card);
       });
     }
 

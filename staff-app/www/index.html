@@ -257,79 +257,109 @@
     }
     .rk-hint-icon { flex-shrink: 0; }
 
-    /* ── AVAILABILITY TABLE ── */
-    .rk-avail-wrap {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      border-radius: var(--radius-sm);
+    /* ── DAY PILLS ── */
+    .rk-day-pills {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
     }
-
-    .rk-avail-tbl {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 340px;
+    .rk-day-pill {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      background: var(--bg3); border: 2px solid var(--border);
+      border-radius: 12px; padding: 10px 4px;
+      cursor: pointer; transition: all .18s;
+      -webkit-tap-highlight-color: transparent;
+      min-width: 0;
     }
-
-    .rk-avail-tbl thead th {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px; font-weight: 500;
-      color: var(--text3);
-      letter-spacing: .8px; text-transform: uppercase;
-      text-align: left;
-      padding: 8px 10px;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
+    .rk-day-pill:active { transform: scale(.95); }
+    .rk-day-pill.has-dates {
+      background: rgba(91,127,255,.12);
+      border-color: var(--accent);
     }
-
-    .rk-avail-tbl tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background .15s;
-    }
-    .rk-avail-tbl tbody tr:last-child { border-bottom: none; }
-    .rk-avail-tbl tbody tr:hover { background: var(--bg3); }
-
-    .rk-avail-tbl td { padding: 10px; vertical-align: middle; }
-    .rk-avail-tbl td:first-child { padding-left: 4px; }
-
-    .rk-day-name { font-size: 14px; font-weight: 600; color: var(--text); }
-    .rk-day-abbr {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px; color: var(--text3);
-    }
-
-    .rk-tsel {
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
+    .rk-pill-label {
+      font-size: 14px; font-weight: 700; color: var(--text);
       font-family: 'Manrope', sans-serif;
-      font-size: 13px;
-      padding: 6px 8px;
-      outline: none;
+    }
+    .rk-pill-count {
+      font-size: 10px; color: var(--text3);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .rk-day-pill.has-dates .rk-pill-label { color: var(--accent); }
+    .rk-day-pill.has-dates .rk-pill-count { color: var(--accent); }
+
+    /* ── DATE PICKER MODAL ── */
+    .rk-date-modal {
+      position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,.55);
+      display: flex; align-items: flex-end;
+      -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+    }
+    .rk-date-sheet {
+      background: var(--bg2); border-radius: 22px 22px 0 0;
+      width: 100%; max-height: 80vh;
+      display: flex; flex-direction: column;
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+    .rk-sheet-handle {
+      width: 40px; height: 4px; background: var(--border);
+      border-radius: 2px; margin: 14px auto 0; flex-shrink: 0;
+    }
+    .rk-sheet-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 20px 10px; flex-shrink: 0;
+    }
+    .rk-sheet-title {
+      font-size: 17px; font-weight: 800; color: var(--text);
+    }
+    .rk-sheet-done {
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 20px;
+      font-family: 'Manrope', sans-serif; font-size: 14px; font-weight: 700;
+      padding: 7px 18px; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rk-sheet-time {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 20px 14px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .rk-sheet-time-label {
+      font-size: 13px; color: var(--text3); flex-shrink: 0;
+    }
+    .rk-tsel {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: 'Manrope', sans-serif; font-size: 14px;
+      padding: 8px 10px; outline: none;
       -webkit-appearance: none; appearance: none;
-      cursor: pointer;
-      min-height: 36px;
-      transition: border-color .15s;
+      cursor: pointer; min-height: 44px;
+      transition: border-color .15s; flex: 1;
     }
     .rk-tsel:focus { border-color: var(--accent); }
-
-    .rk-status-sel { width: 126px; }
-    .rk-time-sel   { width: 82px; }
-    .rk-time-cell  { display: flex; align-items: center; gap: 6px; }
-    .rk-time-sep   { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); }
-
-    .rk-st-badge { display: inline-block; }
-    .rk-st-off   {
-      font-size: 11px; font-weight: 600;
-      color: var(--red); background: var(--red-dim);
-      border: 1px solid rgba(245,101,101,.2);
-      border-radius: 20px; padding: 3px 10px;
+    .rk-time-sep {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px; color: var(--text3); flex-shrink: 0;
     }
-    .rk-st-leave {
-      font-size: 11px; font-weight: 600;
-      color: var(--amber); background: var(--amber-dim);
-      border: 1px solid rgba(245,166,35,.2);
-      border-radius: 20px; padding: 3px 10px;
+    .rk-sheet-dates { overflow-y: auto; flex: 1; }
+    .rk-date-option {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 20px; border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: background .12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rk-date-option:last-child { border-bottom: none; }
+    .rk-date-option.selected { background: rgba(91,127,255,.1); }
+    .rk-date-info { flex: 1; }
+    .rk-date-main { font-size: 15px; font-weight: 600; color: var(--text); }
+    .rk-date-sub  { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+    .rk-date-check {
+      width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; transition: all .15s;
+    }
+    .rk-date-option.selected .rk-date-check {
+      background: var(--accent); border-color: var(--accent); color: #fff;
     }
 
     /* ── SUBMIT CARD ── */
@@ -659,23 +689,14 @@
           <div class="rk-card-icon">📅</div>
           <div>
             <div class="rk-card-title">Weekly Availability</div>
-            <div class="rk-card-sub">Set your status and preferred hours for each day</div>
+            <div class="rk-card-sub">Tap a day to pick the dates you're available</div>
           </div>
         </div>
-        <div class="rk-avail-wrap">
-          <table class="rk-avail-tbl">
-            <thead>
-              <tr>
-                <th>Day</th>
-                <th>Status</th>
-                <th>Hours</th>
-              </tr>
-            </thead>
-            <tbody id="rk-avail-body">
-              <!-- Populated by JS -->
-            </tbody>
-          </table>
+        <div class="rk-hint" style="margin-bottom:14px">
+          <span class="rk-hint-icon">💡</span>
+          <span>Select specific dates — great for planning ahead. Tap a day, choose your dates, then set preferred hours.</span>
         </div>
+        <div class="rk-day-pills" id="rk-avail-pills"></div>
       </div>
 
       <!-- SUBMIT CARD -->
@@ -726,11 +747,30 @@
     <button class="rk-btn-ghost" id="rk-reset-btn">↩ Edit &amp; Resubmit</button>
   </div>
 
+  <!-- DATE PICKER MODAL -->
+  <div class="rk-date-modal" id="rk-date-modal" style="display:none" role="dialog" aria-modal="true">
+    <div class="rk-date-sheet">
+      <div class="rk-sheet-handle"></div>
+      <div class="rk-sheet-hdr">
+        <div class="rk-sheet-title" id="rk-sheet-day-title">Monday</div>
+        <button class="rk-sheet-done" id="rk-sheet-done">Done</button>
+      </div>
+      <div class="rk-sheet-time">
+        <span class="rk-sheet-time-label">From</span>
+        <select class="rk-tsel" id="rk-sheet-start"></select>
+        <span class="rk-time-sep">→</span>
+        <span class="rk-sheet-time-label">To</span>
+        <select class="rk-tsel" id="rk-sheet-end"></select>
+      </div>
+      <div class="rk-sheet-dates" id="rk-sheet-dates"></div>
+    </div>
+  </div>
+
   <!-- FOOTER -->
   <footer class="rk-footer">
     <span>RosterKit &nbsp;·&nbsp; Staff Availability Form</span>
     <span>No data leaves this page until you send the email</span>
-    <div class="rk-pbp" style="margin-top:8px">ProductivityByPhil</div>
+    <div class="rk-pbp" style="margin-top:8px">Philip Vieyra</div>
   </footer>
 
   <!-- TOASTS -->
@@ -746,7 +786,6 @@
       return str.replace(/[<>"'`]/g, '').trim().slice(0, maxLen || 200);
     }
     function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
-    function isValidTime(t)  { return /^\d{2}:\d{2}$/.test(t); }
     function $(id)           { return document.getElementById(id); }
 
     // ── TOASTS ──
@@ -759,7 +798,7 @@
       setTimeout(() => t.remove(), 3500);
     }
 
-    // ── AVAILABILITY TABLE ──
+    // ── DAYS CONFIG ──
     const DAYS = [
       { key:'Mon', label:'Monday'    },
       { key:'Tue', label:'Tuesday'   },
@@ -769,81 +808,171 @@
       { key:'Sat', label:'Saturday'  },
       { key:'Sun', label:'Sunday'    }
     ];
+    const DAY_DOW = { Sun:0, Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6 };
 
-    function buildTimeSelect(id, defaultVal) {
-      const sel = document.createElement('select');
-      sel.className = 'rk-tsel rk-time-sel'; sel.id = id;
+    // ── STATE ──
+    const daySelections = {};
+    DAYS.forEach(d => { daySelections[d.key] = { dates:[], start:'09:00', end:'17:00' }; });
+    let activeDayKey = null;
+
+    // ── GET NEXT N UPCOMING DATES FOR A DAY OF WEEK ──
+    function getUpcomingDates(dayKey, count) {
+      count = count || 8;
+      const targetDow = DAY_DOW[dayKey];
+      const results   = [];
+      const today     = new Date(); today.setHours(0,0,0,0);
+      const d         = new Date(today);
+      const diff      = (targetDow - d.getDay() + 7) % 7;
+      d.setDate(d.getDate() + diff);
+      for (let i = 0; i < count; i++) {
+        const iso     = d.toISOString().slice(0,10);
+        const display = d.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+        results.push({ iso, display });
+        d.setDate(d.getDate() + 7);
+      }
+      return results;
+    }
+
+    // ── FILL A TIME <SELECT> WITH 30-MIN INTERVALS ──
+    function fillTimeSelect(el, defaultVal) {
+      if (!el) return;
+      el.innerHTML = '';
       for (let h = 0; h < 24; h++) {
         for (let m = 0; m < 60; m += 30) {
           const val = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
           const opt = document.createElement('option');
           opt.value = val; opt.textContent = val;
           if (val === defaultVal) opt.selected = true;
-          sel.appendChild(opt);
+          el.appendChild(opt);
         }
       }
-      return sel;
     }
 
-    function buildStatusSelect(key) {
-      const sel = document.createElement('select');
-      sel.className = 'rk-tsel rk-status-sel'; sel.id = 'rk-status-' + key;
-      [
-        { value:'working', label:'Available'     },
-        { value:'off',     label:'Not Available' },
-        { value:'leave',   label:'On Leave'      }
-      ].forEach(({ value, label }) => {
-        const opt = document.createElement('option');
-        opt.value = value; opt.textContent = label;
-        sel.appendChild(opt);
+    // ── BUILD DAY PILLS ──
+    function buildDayPills() {
+      const container = $('rk-avail-pills'); if (!container) return;
+      container.innerHTML = '';
+      DAYS.forEach(day => {
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'rk-day-pill';
+        pill.id = 'rk-pill-' + day.key;
+        pill.setAttribute('aria-label', 'Pick dates for ' + day.label);
+        pill.addEventListener('click', () => openDayPicker(day.key));
+
+        const lbl = document.createElement('span');
+        lbl.className = 'rk-pill-label';
+        lbl.textContent = day.key;
+
+        const cnt = document.createElement('span');
+        cnt.className = 'rk-pill-count';
+        cnt.id = 'rk-pill-count-' + day.key;
+        cnt.textContent = '—';
+
+        pill.appendChild(lbl);
+        pill.appendChild(cnt);
+        container.appendChild(pill);
       });
-      sel.addEventListener('change', () => updateTimeVis(key));
-      return sel;
+
+      // Pre-fill modal time selects once DOM is ready
+      fillTimeSelect($('rk-sheet-start'), '09:00');
+      fillTimeSelect($('rk-sheet-end'),   '17:00');
     }
 
-    function updateTimeVis(key) {
-      const status  = $('rk-status-' + key).value;
-      const working = status === 'working';
-      $('rk-trow-' + key).style.display   = working ? '' : 'none';
-      $('rk-badge-' + key).style.display  = working ? 'none' : '';
-      const badge = $('rk-badge-' + key);
-      while (badge.firstChild) badge.removeChild(badge.firstChild);
-      if (!working) {
-        const span = document.createElement('span');
-        span.className = 'rk-st-badge ' + (status === 'leave' ? 'rk-st-leave' : 'rk-st-off');
-        span.textContent = status === 'leave' ? 'On Leave' : 'Not Available';
-        badge.appendChild(span);
+    function updatePill(dayKey) {
+      const sel  = daySelections[dayKey];
+      const pill = $('rk-pill-' + dayKey);
+      const cnt  = $('rk-pill-count-' + dayKey);
+      if (!pill || !cnt) return;
+      const n = sel.dates.length;
+      if (n > 0) {
+        pill.classList.add('has-dates');
+        cnt.textContent = n + (n === 1 ? ' date' : ' dates');
+      } else {
+        pill.classList.remove('has-dates');
+        cnt.textContent = '—';
       }
     }
 
-    function buildAvailabilityTable() {
-      const tbody = $('rk-avail-body'); if (!tbody) return;
-      DAYS.forEach(day => {
-        const row = document.createElement('tr');
+    // ── OPEN DATE PICKER SHEET ──
+    function openDayPicker(dayKey) {
+      activeDayKey = dayKey;
+      const day = DAYS.find(d => d.key === dayKey);
+      const sel = daySelections[dayKey];
 
-        // Day
-        const dc = document.createElement('td');
-        const dn = document.createElement('div'); dn.className = 'rk-day-name'; dn.textContent = day.label;
-        const da = document.createElement('div'); da.className = 'rk-day-abbr'; da.textContent = day.key;
-        dc.appendChild(dn); dc.appendChild(da);
+      $('rk-sheet-day-title').textContent = day.label;
 
-        // Status
-        const sc = document.createElement('td');
-        sc.appendChild(buildStatusSelect(day.key));
+      const startSel = $('rk-sheet-start');
+      const endSel   = $('rk-sheet-end');
+      if (startSel) startSel.value = sel.start;
+      if (endSel)   endSel.value   = sel.end;
 
-        // Hours (start → end)
-        const hc   = document.createElement('td');
-        const trow = document.createElement('div'); trow.className = 'rk-time-cell'; trow.id = 'rk-trow-' + day.key;
-        const sep  = document.createElement('span'); sep.className = 'rk-time-sep'; sep.textContent = '→';
-        trow.appendChild(buildTimeSelect('rk-start-' + day.key, '09:00'));
-        trow.appendChild(sep);
-        trow.appendChild(buildTimeSelect('rk-end-'   + day.key, '17:00'));
-        const badge = document.createElement('div'); badge.id = 'rk-badge-' + day.key; badge.style.display = 'none';
-        hc.appendChild(trow); hc.appendChild(badge);
+      const datesEl = $('rk-sheet-dates');
+      datesEl.innerHTML = '';
 
-        row.appendChild(dc); row.appendChild(sc); row.appendChild(hc);
-        tbody.appendChild(row);
+      getUpcomingDates(dayKey, 8).forEach(item => {
+        const row = document.createElement('div');
+        const isSelected = sel.dates.includes(item.iso);
+        row.className = 'rk-date-option' + (isSelected ? ' selected' : '');
+        row.setAttribute('data-date', item.iso);
+        row.addEventListener('click', () => toggleDate(dayKey, item.iso, row));
+
+        const info = document.createElement('div');
+        info.className = 'rk-date-info';
+
+        const main = document.createElement('div');
+        main.className = 'rk-date-main';
+        main.textContent = item.display;
+
+        const sub = document.createElement('div');
+        sub.className = 'rk-date-sub';
+        sub.textContent = item.iso;
+
+        info.appendChild(main);
+        info.appendChild(sub);
+
+        const check = document.createElement('div');
+        check.className = 'rk-date-check';
+        if (isSelected) check.textContent = '✓';
+
+        row.appendChild(info);
+        row.appendChild(check);
+        datesEl.appendChild(row);
       });
+
+      const modal = $('rk-date-modal');
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+
+    // ── TOGGLE DATE SELECTION ──
+    function toggleDate(dayKey, dateStr, rowEl) {
+      const sel = daySelections[dayKey];
+      const idx = sel.dates.indexOf(dateStr);
+      if (idx === -1) {
+        sel.dates.push(dateStr);
+        sel.dates.sort();
+        rowEl.classList.add('selected');
+        rowEl.querySelector('.rk-date-check').textContent = '✓';
+      } else {
+        sel.dates.splice(idx, 1);
+        rowEl.classList.remove('selected');
+        rowEl.querySelector('.rk-date-check').textContent = '';
+      }
+    }
+
+    // ── CLOSE DATE PICKER SHEET ──
+    function closeDateModal() {
+      if (activeDayKey) {
+        const startSel = $('rk-sheet-start');
+        const endSel   = $('rk-sheet-end');
+        if (startSel) daySelections[activeDayKey].start = startSel.value;
+        if (endSel)   daySelections[activeDayKey].end   = endSel.value;
+        updatePill(activeDayKey);
+      }
+      activeDayKey = null;
+      $('rk-date-modal').style.display = 'none';
+      document.body.style.overflow = '';
     }
 
     // ── VALIDATION ──
@@ -871,21 +1000,18 @@
       return ok;
     }
 
-    // ── PAYLOAD ──
+    // ── PAYLOAD (v2 — specific dates) ──
     function buildPayload() {
-      const av = {};
+      const availability = [];
       DAYS.forEach(day => {
-        const type = $('rk-status-' + day.key).value;
-        const s    = $('rk-start-' + day.key)?.value || '';
-        const e    = $('rk-end-'   + day.key)?.value || '';
-        av[day.key] = {
-          type,
-          start: (type === 'working' && isValidTime(s)) ? s : '',
-          end:   (type === 'working' && isValidTime(e)) ? e : ''
-        };
+        const sel = daySelections[day.key];
+        sel.dates.forEach(dateStr => {
+          availability.push({ date: dateStr, day: day.key, start: sel.start, end: sel.end });
+        });
       });
+      availability.sort((a,b) => a.date.localeCompare(b.date));
       return {
-        _schema:        'rosterkit-avail-v1',
+        _schema:        'rosterkit-avail-v2',
         _type:          'staff-availability',
         _generated:     new Date().toISOString(),
         memberName:     sanitize($('rk-name').value, 100),
@@ -895,7 +1021,7 @@
         employmentType: $('rk-basis').value,
         hourlyRate:     sanitize($('rk-rate').value, 10),
         notes:          sanitize($('rk-notes').value, 200),
-        availability:   av
+        availability
       };
     }
 
@@ -918,7 +1044,7 @@
     function openEmail(managerEmail, memberName, filename) {
       const subj = encodeURIComponent('RosterKit Availability — ' + memberName);
       const body = encodeURIComponent(
-        'Hi,\n\nPlease find my weekly availability attached as:\n    ' + filename +
+        'Hi,\n\nPlease find my availability attached as:\n    ' + filename +
         '\n\nTo import it into RosterKit:\n    Manager Mode → Import Availability → select the attached file\n\n' +
         'Submitted by: ' + memberName + '\nSubmitted at: ' + new Date().toLocaleString() +
         '\n\n— Sent via RosterKit Staff Availability Form'
@@ -980,7 +1106,11 @@
 
     // ── BOOT ──
     function init() {
-      buildAvailabilityTable();
+      buildDayPills();
+      $('rk-sheet-done')?.addEventListener('click', closeDateModal);
+      $('rk-date-modal')?.addEventListener('click', e => {
+        if (e.target === $('rk-date-modal')) closeDateModal();
+      });
       $('rk-submit-btn')?.addEventListener('click', handleSubmit);
       $('rk-share')?.addEventListener('click', handleShare);
       $('rk-reset-btn')?.addEventListener('click', handleReset);
