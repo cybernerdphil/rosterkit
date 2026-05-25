@@ -342,14 +342,31 @@
     }
     .rk-sheet-dates { overflow-y: auto; flex: 1; }
     .rk-date-option {
-      display: flex; align-items: center; gap: 14px;
-      padding: 14px 20px; border-bottom: 1px solid var(--border);
-      cursor: pointer; transition: background .12s;
-      -webkit-tap-highlight-color: transparent;
+      display: flex; flex-direction: column;
+      padding: 12px 20px; border-bottom: 1px solid var(--border);
+      transition: background .12s;
     }
     .rk-date-option:last-child { border-bottom: none; }
-    .rk-date-option.selected { background: rgba(91,127,255,.1); }
+    .rk-date-option.selected { background: rgba(91,127,255,.08); }
+    .rk-date-row-main {
+      display: flex; align-items: center; gap: 14px;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
     .rk-date-info { flex: 1; }
+    .rk-date-time-row {
+      display: flex; align-items: center; gap: 6px;
+      padding-top: 10px; padding-left: 2px;
+    }
+    .rk-dtsel {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text);
+      font-family: 'Manrope', sans-serif; font-size: 13px;
+      padding: 6px 6px; outline: none;
+      -webkit-appearance: none; appearance: none;
+      cursor: pointer; min-height: 36px;
+      flex: 1; transition: border-color .15s;
+    }
+    .rk-dtsel:focus { border-color: var(--accent); }
     .rk-date-main { font-size: 15px; font-weight: 600; color: var(--text); }
     .rk-date-sub  { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
     .rk-date-check {
@@ -755,13 +772,7 @@
         <div class="rk-sheet-title" id="rk-sheet-day-title">Monday</div>
         <button class="rk-sheet-done" id="rk-sheet-done">Done</button>
       </div>
-      <div class="rk-sheet-time">
-        <span class="rk-sheet-time-label">From</span>
-        <select class="rk-tsel" id="rk-sheet-start"></select>
-        <span class="rk-time-sep">→</span>
-        <span class="rk-sheet-time-label">To</span>
-        <select class="rk-tsel" id="rk-sheet-end"></select>
-      </div>
+
       <div class="rk-sheet-dates" id="rk-sheet-dates"></div>
     </div>
   </div>
@@ -811,8 +822,9 @@
     const DAY_DOW = { Sun:0, Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6 };
 
     // ── STATE ──
+    // entries: [{ date:'2026-06-01', start:'09:00', end:'17:00' }, ...]
     const daySelections = {};
-    DAYS.forEach(d => { daySelections[d.key] = { dates:[], start:'09:00', end:'17:00' }; });
+    DAYS.forEach(d => { daySelections[d.key] = { entries: [] }; });
     let activeDayKey = null;
 
     // ── GET NEXT N UPCOMING DATES FOR A DAY OF WEEK ──
@@ -873,10 +885,6 @@
         pill.appendChild(cnt);
         container.appendChild(pill);
       });
-
-      // Pre-fill modal time selects once DOM is ready
-      fillTimeSelect($('rk-sheet-start'), '09:00');
-      fillTimeSelect($('rk-sheet-end'),   '17:00');
     }
 
     function updatePill(dayKey) {
@@ -884,7 +892,7 @@
       const pill = $('rk-pill-' + dayKey);
       const cnt  = $('rk-pill-count-' + dayKey);
       if (!pill || !cnt) return;
-      const n = sel.dates.length;
+      const n = sel.entries.length;
       if (n > 0) {
         pill.classList.add('has-dates');
         cnt.textContent = n + (n === 1 ? ' date' : ' dates');
@@ -902,32 +910,29 @@
 
       $('rk-sheet-day-title').textContent = day.label;
 
-      const startSel = $('rk-sheet-start');
-      const endSel   = $('rk-sheet-end');
-      if (startSel) startSel.value = sel.start;
-      if (endSel)   endSel.value   = sel.end;
-
       const datesEl = $('rk-sheet-dates');
       datesEl.innerHTML = '';
 
       getUpcomingDates(dayKey, 8).forEach(item => {
+        const existing   = sel.entries.find(e => e.date === item.iso);
+        const isSelected = !!existing;
+
         const row = document.createElement('div');
-        const isSelected = sel.dates.includes(item.iso);
         row.className = 'rk-date-option' + (isSelected ? ' selected' : '');
         row.setAttribute('data-date', item.iso);
-        row.addEventListener('click', () => toggleDate(dayKey, item.iso, row));
+
+        // Main row: date info + check circle
+        const mainRow = document.createElement('div');
+        mainRow.className = 'rk-date-row-main';
 
         const info = document.createElement('div');
         info.className = 'rk-date-info';
-
         const main = document.createElement('div');
         main.className = 'rk-date-main';
         main.textContent = item.display;
-
         const sub = document.createElement('div');
         sub.className = 'rk-date-sub';
         sub.textContent = item.iso;
-
         info.appendChild(main);
         info.appendChild(sub);
 
@@ -935,8 +940,55 @@
         check.className = 'rk-date-check';
         if (isSelected) check.textContent = '✓';
 
-        row.appendChild(info);
-        row.appendChild(check);
+        mainRow.appendChild(info);
+        mainRow.appendChild(check);
+        row.appendChild(mainRow);
+
+        // Per-date time row (expands on selection)
+        const timeRow = document.createElement('div');
+        timeRow.className = 'rk-date-time-row';
+        timeRow.style.display = isSelected ? 'flex' : 'none';
+        timeRow.addEventListener('click', e => e.stopPropagation());
+
+        const fromLbl = document.createElement('span');
+        fromLbl.className = 'rk-sheet-time-label';
+        fromLbl.textContent = 'From';
+
+        const startSel = document.createElement('select');
+        startSel.className = 'rk-dtsel';
+        fillTimeSelect(startSel, existing?.start || '09:00');
+        startSel.addEventListener('change', () => {
+          const entry = daySelections[dayKey].entries.find(e => e.date === item.iso);
+          if (entry) entry.start = startSel.value;
+        });
+
+        const sep = document.createElement('span');
+        sep.className = 'rk-time-sep';
+        sep.textContent = '→';
+
+        const toLbl = document.createElement('span');
+        toLbl.className = 'rk-sheet-time-label';
+        toLbl.textContent = 'To';
+
+        const endSel = document.createElement('select');
+        endSel.className = 'rk-dtsel';
+        fillTimeSelect(endSel, existing?.end || '17:00');
+        endSel.addEventListener('change', () => {
+          const entry = daySelections[dayKey].entries.find(e => e.date === item.iso);
+          if (entry) entry.end = endSel.value;
+        });
+
+        timeRow.appendChild(fromLbl);
+        timeRow.appendChild(startSel);
+        timeRow.appendChild(sep);
+        timeRow.appendChild(toLbl);
+        timeRow.appendChild(endSel);
+        row.appendChild(timeRow);
+
+        mainRow.addEventListener('click', () => {
+          toggleDate(dayKey, item.iso, row, startSel, endSel, timeRow);
+        });
+
         datesEl.appendChild(row);
       });
 
@@ -946,31 +998,31 @@
     }
 
     // ── TOGGLE DATE SELECTION ──
-    function toggleDate(dayKey, dateStr, rowEl) {
+    function toggleDate(dayKey, dateStr, rowEl, startSel, endSel, timeRow) {
       const sel = daySelections[dayKey];
-      const idx = sel.dates.indexOf(dateStr);
+      const idx = sel.entries.findIndex(e => e.date === dateStr);
       if (idx === -1) {
-        sel.dates.push(dateStr);
-        sel.dates.sort();
+        sel.entries.push({ date: dateStr, start: '09:00', end: '17:00' });
+        sel.entries.sort((a,b) => a.date.localeCompare(b.date));
         rowEl.classList.add('selected');
         rowEl.querySelector('.rk-date-check').textContent = '✓';
+        fillTimeSelect(startSel, '09:00');
+        fillTimeSelect(endSel,   '17:00');
+        timeRow.style.display = 'flex';
       } else {
-        sel.dates.splice(idx, 1);
+        sel.entries.splice(idx, 1);
         rowEl.classList.remove('selected');
         rowEl.querySelector('.rk-date-check').textContent = '';
+        timeRow.style.display = 'none';
       }
     }
 
     // ── CLOSE DATE PICKER SHEET ──
     function closeDateModal() {
       if (activeDayKey) {
-        const startSel = $('rk-sheet-start');
-        const endSel   = $('rk-sheet-end');
-        if (startSel) daySelections[activeDayKey].start = startSel.value;
-        if (endSel)   daySelections[activeDayKey].end   = endSel.value;
         updatePill(activeDayKey);
+        activeDayKey = null;
       }
-      activeDayKey = null;
       $('rk-date-modal').style.display = 'none';
       document.body.style.overflow = '';
     }
@@ -1000,13 +1052,12 @@
       return ok;
     }
 
-    // ── PAYLOAD (v2 — specific dates) ──
+    // ── PAYLOAD (v2 — per-date individual times) ──
     function buildPayload() {
       const availability = [];
       DAYS.forEach(day => {
-        const sel = daySelections[day.key];
-        sel.dates.forEach(dateStr => {
-          availability.push({ date: dateStr, day: day.key, start: sel.start, end: sel.end });
+        daySelections[day.key].entries.forEach(entry => {
+          availability.push({ date: entry.date, day: day.key, start: entry.start, end: entry.end });
         });
       });
       availability.sort((a,b) => a.date.localeCompare(b.date));
