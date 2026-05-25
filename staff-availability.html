@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>RosterKit — Submit Your Availability</title>
+  <link rel="manifest" href="./manifest-staff.json" />
+  <link rel="apple-touch-icon" href="./assets/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0f1117" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ── RESET & ROOT ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+    :root {
+      --bg:          #0f1117;
+      --bg2:         #161820;
+      --bg3:         #1d2030;
+      --border:      #272b3a;
+      --border2:     #363b50;
+      --text:        #eef0f8;
+      --text2:       #9298b0;
+      --text3:       #555d7a;
+      --accent:      #5b7fff;
+      --accent-glow: rgba(91,127,255,.18);
+      --accent-dim:  rgba(91,127,255,.10);
+      --green:       #3ecf8e;
+      --green-dim:   rgba(62,207,142,.12);
+      --amber:       #f5a623;
+      --amber-dim:   rgba(245,166,35,.12);
+      --red:         #f56565;
+      --red-dim:     rgba(245,101,101,.12);
+      --radius:      14px;
+      --radius-sm:   8px;
+      --safe-top:    env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --safe-left:   env(safe-area-inset-left, 0px);
+      --safe-right:  env(safe-area-inset-right, 0px);
+    }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+      padding-bottom: calc(80px + var(--safe-bottom));
+      padding-left: var(--safe-left);
+      padding-right: var(--safe-right);
+    }
+
+    /* ── HEADER ── */
+    .rk-header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15,17,23,.88);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: calc(var(--safe-top) + 12px) 20px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .rk-brand { display: flex; align-items: center; gap: 10px; }
+
+    .rk-logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, #3a52cc, var(--accent));
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 20px var(--accent-glow);
+      flex-shrink: 0;
+    }
+
+    .rk-brand-name {
+      font-size: 17px; font-weight: 800;
+      letter-spacing: -.4px; color: var(--text);
+    }
+
+    .rk-brand-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; color: var(--text3);
+      letter-spacing: .8px; text-transform: uppercase;
+      margin-top: 1px;
+    }
+
+    .rk-version {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--accent);
+      border: 1px solid rgba(91,127,255,.25);
+      padding: 3px 9px; border-radius: 20px;
+      background: var(--accent-dim);
+    }
+
+    /* ── HERO ── */
+    .rk-hero {
+      padding: 40px 20px 32px;
+      max-width: 580px; margin: 0 auto;
+    }
+
+    .rk-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; color: var(--accent);
+      letter-spacing: 1.2px; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .rk-hero h1 {
+      font-size: clamp(26px, 7vw, 36px);
+      font-weight: 800; letter-spacing: -.6px;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .rk-hero h1 em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--accent), #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .rk-hero-desc {
+      font-size: 14px; color: var(--text2); line-height: 1.7;
+    }
+
+    /* ── STEPS ── */
+    .rk-steps {
+      display: flex; flex-direction: column; gap: 0;
+      padding: 0 20px 32px; max-width: 580px; margin: 0 auto;
+    }
+
+    .rk-step {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .rk-step:last-child { border-bottom: none; }
+
+    .rk-step-num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--accent-dim); border: 1px solid var(--accent);
+      color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; font-weight: 500;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 2px;
+    }
+
+    .rk-step-text strong { font-size: 14px; font-weight: 700; color: var(--text); }
+    .rk-step-text span { font-size: 13px; color: var(--text2); display: block; margin-top: 2px; }
+
+    /* ── MAIN CONTENT ── */
+    .rk-main {
+      padding: 0 20px; max-width: 580px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+
+    /* ── CARDS ── */
+    .rk-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color .2s;
+    }
+    .rk-card:focus-within { border-color: var(--border2); }
+
+    .rk-card-head {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .rk-card-icon {
+      width: 38px; height: 38px;
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+
+    .rk-card-title {
+      font-size: 15px; font-weight: 700; color: var(--text);
+      letter-spacing: -.2px;
+    }
+    .rk-card-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+    /* ── FORM GRID ── */
+    .rk-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .rk-grid .full { grid-column: 1 / -1; }
+
+    /* ── FORM ELEMENTS ── */
+    .rk-group { display: flex; flex-direction: column; gap: 6px; }
+
+    .rk-label {
+      font-size: 12px; font-weight: 600;
+      color: var(--text2); letter-spacing: .2px;
+      text-transform: uppercase;
+    }
+
+    .rk-required { color: var(--accent); margin-left: 2px; }
+
+    .rk-input, .rk-sel, .rk-textarea {
+      width: 100%;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'Manrope', sans-serif;
+      font-size: 15px;
+      padding: 11px 14px;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      -webkit-appearance: none; appearance: none;
+      min-height: 44px; /* iOS touch target */
+    }
+
+    .rk-input:focus, .rk-sel:focus, .rk-textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-dim);
+    }
+
+    .rk-input::placeholder { color: var(--text3); }
+    .rk-input.error { border-color: var(--red); }
+    .rk-sel.error   { border-color: var(--red); }
+
+    .rk-sel {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%239298b0' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    .rk-err {
+      font-size: 11px; color: var(--red);
+      min-height: 16px; font-weight: 500;
+    }
+
+    .rk-hint {
+      font-size: 12px; color: var(--text3);
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      margin-bottom: 4px;
+      display: flex; gap: 8px; align-items: flex-start;
+    }
+    .rk-hint-icon { flex-shrink: 0; }
+
+    /* ── AVAILABILITY TABLE ── */
+    .rk-avail-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: var(--radius-sm);
+    }
+
+    .rk-avail-tbl {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 340px;
+    }
+
+    .rk-avail-tbl thead th {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; font-weight: 500;
+      color: var(--text3);
+      letter-spacing: .8px; text-transform: uppercase;
+      text-align: left;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .rk-avail-tbl tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .rk-avail-tbl tbody tr:last-child { border-bottom: none; }
+    .rk-avail-tbl tbody tr:hover { background: var(--bg3); }
+
+    .rk-avail-tbl td { padding: 10px; vertical-align: middle; }
+    .rk-avail-tbl td:first-child { padding-left: 4px; }
+
+    .rk-day-name { font-size: 14px; font-weight: 600; color: var(--text); }
+    .rk-day-abbr {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--text3);
+    }
+
+    .rk-tsel {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      padding: 6px 8px;
+      outline: none;
+      -webkit-appearance: none; appearance: none;
+      cursor: pointer;
+      min-height: 36px;
+      transition: border-color .15s;
+    }
+    .rk-tsel:focus { border-color: var(--accent); }
+
+    .rk-status-sel { width: 126px; }
+    .rk-time-sel   { width: 82px; }
+    .rk-time-cell  { display: flex; align-items: center; gap: 6px; }
+    .rk-time-sep   { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); }
+
+    .rk-st-badge { display: inline-block; }
+    .rk-st-off   {
+      font-size: 11px; font-weight: 600;
+      color: var(--red); background: var(--red-dim);
+      border: 1px solid rgba(245,101,101,.2);
+      border-radius: 20px; padding: 3px 10px;
+    }
+    .rk-st-leave {
+      font-size: 11px; font-weight: 600;
+      color: var(--amber); background: var(--amber-dim);
+      border: 1px solid rgba(245,166,35,.2);
+      border-radius: 20px; padding: 3px 10px;
+    }
+
+    /* ── SUBMIT CARD ── */
+    .rk-submit-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .rk-cta {
+      width: 100%;
+      background: linear-gradient(135deg, #3a52cc, var(--accent));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Manrope', sans-serif;
+      font-size: 16px; font-weight: 700;
+      padding: 15px 24px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: opacity .2s, transform .1s;
+      min-height: 52px;
+      box-shadow: 0 4px 24px var(--accent-glow);
+      letter-spacing: -.2px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rk-cta:active { transform: scale(.98); opacity: .9; }
+    .rk-cta:disabled { opacity: .5; cursor: not-allowed; }
+
+    .rk-share-btn {
+      width: 100%; margin-top: 10px;
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text2);
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px; font-weight: 600;
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rk-share-btn:active { border-color: var(--accent); color: var(--accent); }
+
+    .rk-cta-note {
+      font-size: 12px; color: var(--text3);
+      text-align: center; margin-top: 14px;
+      line-height: 1.6;
+    }
+
+    /* ── SUCCESS SCREEN ── */
+    .rk-success {
+      display: none;
+      padding: 40px 20px;
+      max-width: 580px; margin: 0 auto;
+      text-align: center;
+    }
+    .rk-success.open { display: block; }
+
+    .rk-success-ring {
+      width: 80px; height: 80px;
+      background: var(--green-dim);
+      border: 2px solid var(--green);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px; margin: 0 auto 24px;
+    }
+
+    .rk-success h2 {
+      font-size: 24px; font-weight: 800;
+      letter-spacing: -.4px; margin-bottom: 12px;
+    }
+
+    .rk-success p { font-size: 14px; color: var(--text2); margin-bottom: 28px; }
+
+    .rk-success-steps {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px;
+      text-align: left; margin-bottom: 24px;
+    }
+
+    .rk-success-steps h3 {
+      font-size: 13px; font-weight: 700;
+      color: var(--text2); text-transform: uppercase;
+      letter-spacing: .5px; margin-bottom: 16px;
+    }
+
+    .rk-success-step {
+      display: flex; gap: 12px; align-items: flex-start;
+      margin-bottom: 14px; font-size: 14px; color: var(--text2);
+    }
+    .rk-success-step:last-child { margin-bottom: 0; }
+
+    .rk-success-step-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--accent-dim); color: var(--accent);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px; font-weight: 500;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+
+    .rk-filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; color: var(--accent);
+    }
+
+    .rk-btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      color: var(--text2);
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px; font-weight: 600;
+      padding: 12px 24px;
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+      min-height: 44px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .rk-btn-ghost:active { border-color: var(--accent); color: var(--accent); }
+
+    /* ── FOOTER ── */
+    .rk-footer {
+      text-align: center;
+      padding: 32px 20px calc(16px + var(--safe-bottom));
+      font-size: 12px; color: var(--text3);
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    /* ── TOASTS ── */
+    #rk-toasts {
+      position: fixed; bottom: calc(24px + var(--safe-bottom));
+      right: 20px; left: 20px;
+      display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none; z-index: 999;
+    }
+
+    .rk-toast {
+      background: var(--bg3); border: 1px solid var(--border2);
+      border-radius: 10px; padding: 12px 16px;
+      font-size: 13px; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
+      animation: toastIn .25s ease;
+      box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    }
+    .rk-toast.success { border-color: var(--green); color: var(--green); }
+    .rk-toast.error   { border-color: var(--red);   color: var(--red); }
+
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── BRANDING ── */
+    .rk-pbp {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px; color: var(--text3);
+      text-align: center; padding: 8px 0 0;
+    }
+
+    /* ── MOBILE TWEAKS ── */
+    @media (max-width: 400px) {
+      .rk-hero h1    { font-size: 24px; }
+      .rk-grid       { grid-template-columns: 1fr; }
+      .rk-status-sel { width: 110px; }
+      .rk-time-sel   { width: 74px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="rk-header">
+    <div class="rk-brand">
+      <div class="rk-logo">📋</div>
+      <div>
+        <div class="rk-brand-name">RosterKit</div>
+        <div class="rk-brand-sub">Availability Form</div>
+      </div>
+    </div>
+    <div class="rk-version">v1.0</div>
+  </header>
+
+  <!-- FORM AREA -->
+  <div id="rk-form-area">
+
+    <!-- Hero -->
+    <div class="rk-hero">
+      <div class="rk-eyebrow">Team Member</div>
+      <h1>Submit Your<br><em>Availability</em></h1>
+      <p class="rk-hero-desc">
+        Fill in your details and weekly availability, then tap Submit —
+        your file downloads and an email to your manager opens ready to send.
+      </p>
+    </div>
+
+    <!-- How it works -->
+    <div class="rk-steps">
+      <div class="rk-step">
+        <div class="rk-step-num">1</div>
+        <div class="rk-step-text">
+          <strong>Fill in this form</strong>
+          <span>Enter your details and set your availability for each day.</span>
+        </div>
+      </div>
+      <div class="rk-step">
+        <div class="rk-step-num">2</div>
+        <div class="rk-step-text">
+          <strong>Tap Submit</strong>
+          <span>Your availability file downloads to your device automatically.</span>
+        </div>
+      </div>
+      <div class="rk-step">
+        <div class="rk-step-num">3</div>
+        <div class="rk-step-text">
+          <strong>Attach &amp; Send</strong>
+          <span>An email to your manager opens — attach the file and hit Send.</span>
+        </div>
+      </div>
+    </div>
+
+    <main class="rk-main">
+
+      <!-- MANAGER SETUP CARD -->
+      <div class="rk-card">
+        <div class="rk-card-head">
+          <div class="rk-card-icon">⚙️</div>
+          <div>
+            <div class="rk-card-title">Manager Setup</div>
+            <div class="rk-card-sub">Pre-filled by your manager before distribution</div>
+          </div>
+        </div>
+        <div class="rk-hint">
+          <span class="rk-hint-icon">ℹ️</span>
+          <span>Enter your manager's email. This is who your availability file will be sent to. Ask your manager if unsure.</span>
+        </div>
+        <div class="rk-group" style="margin-top:12px">
+          <label class="rk-label" for="rk-manager-email">
+            Manager Email <span class="rk-required">*</span>
+          </label>
+          <input class="rk-input" type="email" id="rk-manager-email"
+            placeholder="manager@yourworkplace.com" maxlength="150"
+            autocomplete="off" inputmode="email" />
+          <div class="rk-err" id="rk-manager-email-err"></div>
+        </div>
+      </div>
+
+      <!-- YOUR DETAILS CARD -->
+      <div class="rk-card">
+        <div class="rk-card-head">
+          <div class="rk-card-icon">👤</div>
+          <div>
+            <div class="rk-card-title">Your Details</div>
+            <div class="rk-card-sub">Enter your details as they appear on the roster</div>
+          </div>
+        </div>
+        <div class="rk-grid">
+
+          <div class="rk-group full">
+            <label class="rk-label" for="rk-name">Full Name <span class="rk-required">*</span></label>
+            <input class="rk-input" type="text" id="rk-name"
+              placeholder="e.g. Alex Johnson"
+              autocomplete="name" maxlength="100" />
+            <div class="rk-err" id="rk-name-err"></div>
+          </div>
+
+          <div class="rk-group full">
+            <label class="rk-label" for="rk-email">Your Email <span class="rk-required">*</span></label>
+            <input class="rk-input" type="email" id="rk-email"
+              placeholder="you@email.com"
+              autocomplete="email" maxlength="150"
+              inputmode="email" />
+            <div class="rk-err" id="rk-email-err"></div>
+          </div>
+
+          <div class="rk-group">
+            <label class="rk-label" for="rk-phone">Phone</label>
+            <input class="rk-input" type="tel" id="rk-phone"
+              placeholder="04XX XXX XXX"
+              autocomplete="tel" maxlength="20"
+              inputmode="tel" />
+          </div>
+
+          <div class="rk-group">
+            <label class="rk-label" for="rk-basis">Employment Type <span class="rk-required">*</span></label>
+            <select class="rk-sel" id="rk-basis">
+              <option value="">— Select —</option>
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+              <option value="Casual">Casual</option>
+              <option value="Contractor">Contractor</option>
+            </select>
+            <div class="rk-err" id="rk-basis-err"></div>
+          </div>
+
+          <div class="rk-group full">
+            <label class="rk-label" for="rk-role">Your Role / Position <span class="rk-required">*</span></label>
+            <input class="rk-input" type="text" id="rk-role"
+              placeholder="e.g. Driver, Cashier, Site Supervisor"
+              maxlength="100" />
+            <div class="rk-err" id="rk-role-err"></div>
+          </div>
+
+          <div class="rk-group full">
+            <label class="rk-label" for="rk-rate">Hourly Rate (optional)</label>
+            <input class="rk-input" type="text" id="rk-rate"
+              placeholder="e.g. 28.50"
+              maxlength="10" inputmode="decimal" />
+          </div>
+
+          <div class="rk-group full">
+            <label class="rk-label" for="rk-notes">Notes for Manager (optional)</label>
+            <input class="rk-input" type="text" id="rk-notes"
+              placeholder="e.g. Prefer early shifts, can't do Friday nights"
+              maxlength="200" />
+          </div>
+
+        </div>
+      </div>
+
+      <!-- AVAILABILITY CARD -->
+      <div class="rk-card">
+        <div class="rk-card-head">
+          <div class="rk-card-icon">📅</div>
+          <div>
+            <div class="rk-card-title">Weekly Availability</div>
+            <div class="rk-card-sub">Set your status and preferred hours for each day</div>
+          </div>
+        </div>
+        <div class="rk-avail-wrap">
+          <table class="rk-avail-tbl">
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>Status</th>
+                <th>Hours</th>
+              </tr>
+            </thead>
+            <tbody id="rk-avail-body">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SUBMIT CARD -->
+      <div class="rk-submit-card">
+        <div class="rk-card-head" style="margin-bottom:16px">
+          <div class="rk-card-icon">📤</div>
+          <div>
+            <div class="rk-card-title">Submit Your Availability</div>
+            <div class="rk-card-sub">File downloads, email opens — one tap</div>
+          </div>
+        </div>
+        <button class="rk-cta" id="rk-submit-btn">
+          <span>📎</span><span>Download &amp; Open Email</span>
+        </button>
+        <button class="rk-share-btn" id="rk-share">Share File Instead</button>
+        <p class="rk-cta-note">
+          Your data stays on your device &nbsp;·&nbsp; No server &nbsp;·&nbsp; No tracking
+        </p>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- SUCCESS SCREEN -->
+  <div class="rk-success" id="rk-success">
+    <div class="rk-success-ring">✓</div>
+    <h2>File Downloaded!</h2>
+    <p>Your availability file is saved. Attach it to the email that just opened and send it to your manager.</p>
+    <div class="rk-success-steps">
+      <h3>Next Steps</h3>
+      <div class="rk-success-step">
+        <div class="rk-success-step-num">1</div>
+        <div>Find <strong id="rk-filename-display" class="rk-filename"></strong> in your <strong>Downloads</strong> or <strong>Files</strong> app.</div>
+      </div>
+      <div class="rk-success-step">
+        <div class="rk-success-step-num">2</div>
+        <div>Switch to your <strong>email app</strong> — the message to your manager should already be open.</div>
+      </div>
+      <div class="rk-success-step">
+        <div class="rk-success-step-num">3</div>
+        <div>Tap the <strong>attachment icon</strong>, locate the downloaded file, and attach it.</div>
+      </div>
+      <div class="rk-success-step">
+        <div class="rk-success-step-num">4</div>
+        <div>Tap <strong>Send</strong>. Your manager will import your availability into RosterKit.</div>
+      </div>
+    </div>
+    <button class="rk-btn-ghost" id="rk-reset-btn">↩ Edit &amp; Resubmit</button>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="rk-footer">
+    <span>RosterKit &nbsp;·&nbsp; Staff Availability Form</span>
+    <span>No data leaves this page until you send the email</span>
+    <div class="rk-pbp" style="margin-top:8px">ProductivityByPhil</div>
+  </footer>
+
+  <!-- TOASTS -->
+  <div id="rk-toasts"></div>
+
+  <script>
+  (() => {
+    'use strict';
+
+    // ── UTILITIES ──
+    function sanitize(str, maxLen) {
+      if (typeof str !== 'string') return '';
+      return str.replace(/[<>"'`]/g, '').trim().slice(0, maxLen || 200);
+    }
+    function isValidEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+    function isValidTime(t)  { return /^\d{2}:\d{2}$/.test(t); }
+    function $(id)           { return document.getElementById(id); }
+
+    // ── TOASTS ──
+    function toast(msg, type) {
+      const c = $('rk-toasts'); if (!c) return;
+      const t = document.createElement('div');
+      t.className = 'rk-toast ' + (type || 'info');
+      t.textContent = (type === 'success' ? '✓ ' : type === 'error' ? '✕ ' : '') + msg;
+      c.appendChild(t);
+      setTimeout(() => t.remove(), 3500);
+    }
+
+    // ── AVAILABILITY TABLE ──
+    const DAYS = [
+      { key:'Mon', label:'Monday'    },
+      { key:'Tue', label:'Tuesday'   },
+      { key:'Wed', label:'Wednesday' },
+      { key:'Thu', label:'Thursday'  },
+      { key:'Fri', label:'Friday'    },
+      { key:'Sat', label:'Saturday'  },
+      { key:'Sun', label:'Sunday'    }
+    ];
+
+    function buildTimeSelect(id, defaultVal) {
+      const sel = document.createElement('select');
+      sel.className = 'rk-tsel rk-time-sel'; sel.id = id;
+      for (let h = 0; h < 24; h++) {
+        for (let m = 0; m < 60; m += 30) {
+          const val = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+          const opt = document.createElement('option');
+          opt.value = val; opt.textContent = val;
+          if (val === defaultVal) opt.selected = true;
+          sel.appendChild(opt);
+        }
+      }
+      return sel;
+    }
+
+    function buildStatusSelect(key) {
+      const sel = document.createElement('select');
+      sel.className = 'rk-tsel rk-status-sel'; sel.id = 'rk-status-' + key;
+      [
+        { value:'working', label:'Available'     },
+        { value:'off',     label:'Not Available' },
+        { value:'leave',   label:'On Leave'      }
+      ].forEach(({ value, label }) => {
+        const opt = document.createElement('option');
+        opt.value = value; opt.textContent = label;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', () => updateTimeVis(key));
+      return sel;
+    }
+
+    function updateTimeVis(key) {
+      const status  = $('rk-status-' + key).value;
+      const working = status === 'working';
+      $('rk-trow-' + key).style.display   = working ? '' : 'none';
+      $('rk-badge-' + key).style.display  = working ? 'none' : '';
+      const badge = $('rk-badge-' + key);
+      while (badge.firstChild) badge.removeChild(badge.firstChild);
+      if (!working) {
+        const span = document.createElement('span');
+        span.className = 'rk-st-badge ' + (status === 'leave' ? 'rk-st-leave' : 'rk-st-off');
+        span.textContent = status === 'leave' ? 'On Leave' : 'Not Available';
+        badge.appendChild(span);
+      }
+    }
+
+    function buildAvailabilityTable() {
+      const tbody = $('rk-avail-body'); if (!tbody) return;
+      DAYS.forEach(day => {
+        const row = document.createElement('tr');
+
+        // Day
+        const dc = document.createElement('td');
+        const dn = document.createElement('div'); dn.className = 'rk-day-name'; dn.textContent = day.label;
+        const da = document.createElement('div'); da.className = 'rk-day-abbr'; da.textContent = day.key;
+        dc.appendChild(dn); dc.appendChild(da);
+
+        // Status
+        const sc = document.createElement('td');
+        sc.appendChild(buildStatusSelect(day.key));
+
+        // Hours (start → end)
+        const hc   = document.createElement('td');
+        const trow = document.createElement('div'); trow.className = 'rk-time-cell'; trow.id = 'rk-trow-' + day.key;
+        const sep  = document.createElement('span'); sep.className = 'rk-time-sep'; sep.textContent = '→';
+        trow.appendChild(buildTimeSelect('rk-start-' + day.key, '09:00'));
+        trow.appendChild(sep);
+        trow.appendChild(buildTimeSelect('rk-end-'   + day.key, '17:00'));
+        const badge = document.createElement('div'); badge.id = 'rk-badge-' + day.key; badge.style.display = 'none';
+        hc.appendChild(trow); hc.appendChild(badge);
+
+        row.appendChild(dc); row.appendChild(sc); row.appendChild(hc);
+        tbody.appendChild(row);
+      });
+    }
+
+    // ── VALIDATION ──
+    function validate() {
+      let ok = true;
+      const checks = [
+        { id:'rk-manager-email', errId:'rk-manager-email-err', msg:"Enter your manager's email",    test: isValidEmail },
+        { id:'rk-name',          errId:'rk-name-err',          msg:'Full name is required',         test: v => v.length > 0 },
+        { id:'rk-email',         errId:'rk-email-err',         msg:'Valid email address required',  test: isValidEmail },
+        { id:'rk-role',          errId:'rk-role-err',          msg:'Your role/position is required',test: v => v.length > 0 },
+        { id:'rk-basis',         errId:'rk-basis-err',         msg:'Please select employment type', test: v => v.length > 0 }
+      ];
+      checks.forEach(c => {
+        const el = $(c.id); const errEl = $(c.errId);
+        const v  = el.value.trim();
+        const fail = !v || (c.test && !c.test(v));
+        el.classList.toggle('error', fail);
+        errEl.textContent = fail ? c.msg : '';
+        if (fail) ok = false;
+      });
+      if (!ok) {
+        const first = document.querySelector('.rk-input.error, .rk-sel.error');
+        if (first) first.scrollIntoView({ behavior:'smooth', block:'center' });
+      }
+      return ok;
+    }
+
+    // ── PAYLOAD ──
+    function buildPayload() {
+      const av = {};
+      DAYS.forEach(day => {
+        const type = $('rk-status-' + day.key).value;
+        const s    = $('rk-start-' + day.key)?.value || '';
+        const e    = $('rk-end-'   + day.key)?.value || '';
+        av[day.key] = {
+          type,
+          start: (type === 'working' && isValidTime(s)) ? s : '',
+          end:   (type === 'working' && isValidTime(e)) ? e : ''
+        };
+      });
+      return {
+        _schema:        'rosterkit-avail-v1',
+        _type:          'staff-availability',
+        _generated:     new Date().toISOString(),
+        memberName:     sanitize($('rk-name').value, 100),
+        email:          sanitize($('rk-email').value, 150),
+        phone:          sanitize($('rk-phone').value, 20),
+        role:           sanitize($('rk-role').value, 100),
+        employmentType: $('rk-basis').value,
+        hourlyRate:     sanitize($('rk-rate').value, 10),
+        notes:          sanitize($('rk-notes').value, 200),
+        availability:   av
+      };
+    }
+
+    // ── FILE HELPERS ──
+    function makeFilename(name) {
+      const slug = (name || 'team-member')
+        .replace(/\s+/g,'-').toLowerCase().replace(/[^a-z0-9-]/g,'');
+      return 'rosterkit-avail-' + slug + '-' + new Date().toISOString().slice(0,10) + '.json';
+    }
+
+    function downloadFile(payload, filename) {
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type:'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+    }
+
+    function openEmail(managerEmail, memberName, filename) {
+      const subj = encodeURIComponent('RosterKit Availability — ' + memberName);
+      const body = encodeURIComponent(
+        'Hi,\n\nPlease find my weekly availability attached as:\n    ' + filename +
+        '\n\nTo import it into RosterKit:\n    Manager Mode → Import Availability → select the attached file\n\n' +
+        'Submitted by: ' + memberName + '\nSubmitted at: ' + new Date().toLocaleString() +
+        '\n\n— Sent via RosterKit Staff Availability Form'
+      );
+      window.location.href = 'mailto:' + encodeURIComponent(managerEmail) + '?subject=' + subj + '&body=' + body;
+    }
+
+    // ── SUBMIT ──
+    function setBtn(loading) {
+      const btn = $('rk-submit-btn');
+      btn.disabled = loading;
+      while (btn.firstChild) btn.removeChild(btn.firstChild);
+      const ic = document.createElement('span');
+      const lb = document.createElement('span');
+      ic.textContent = loading ? '⏳' : '📎';
+      lb.textContent = loading ? 'Preparing…' : 'Download & Open Email';
+      btn.appendChild(ic); btn.appendChild(lb);
+    }
+
+    function handleSubmit() {
+      if (!validate()) { toast('Please fix the highlighted fields', 'error'); return; }
+      setBtn(true);
+      const payload  = buildPayload();
+      const filename = makeFilename(payload.memberName);
+      const manager  = sanitize($('rk-manager-email').value, 150);
+      try {
+        downloadFile(payload, filename);
+        setTimeout(() => openEmail(manager, payload.memberName, filename), 400);
+        $('rk-form-area').style.display = 'none';
+        $('rk-success').classList.add('open');
+        $('rk-filename-display').textContent = filename;
+        toast('File downloaded', 'success');
+      } catch {
+        setBtn(false);
+        toast('Something went wrong. Try again.', 'error');
+      }
+    }
+
+    // ── SHARE ──
+    async function handleShare() {
+      if (!navigator.canShare) { toast('Sharing not supported on this device', 'error'); return; }
+      const payload  = buildPayload();
+      const filename = makeFilename(payload.memberName);
+      const file     = new File([JSON.stringify(payload, null, 2)], filename, { type:'application/json' });
+      try {
+        await navigator.share({ title:'RosterKit Availability', files:[file] });
+        toast('Shared successfully', 'success');
+      } catch {
+        toast('Share cancelled', 'error');
+      }
+    }
+
+    // ── RESET ──
+    function handleReset() {
+      $('rk-success').classList.remove('open');
+      $('rk-form-area').style.display = '';
+      setBtn(false);
+    }
+
+    // ── BOOT ──
+    function init() {
+      buildAvailabilityTable();
+      $('rk-submit-btn')?.addEventListener('click', handleSubmit);
+      $('rk-share')?.addEventListener('click', handleShare);
+      $('rk-reset-btn')?.addEventListener('click', handleReset);
+    }
+
+    document.readyState === 'loading'
+      ? document.addEventListener('DOMContentLoaded', init)
+      : init();
+  })();
+  </script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw-staff.js')
+        .catch(err => console.warn('[RosterKit Staff] SW failed', err));
+    }
+  </script>
+</body>
+</html>
