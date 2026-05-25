@@ -68,12 +68,10 @@
     }
     .rk-brand { display: flex; align-items: center; gap: 10px; }
     .rk-logo {
-      width: 36px; height: 36px;
-      background: linear-gradient(135deg, #3a52cc, var(--accent));
-      border-radius: 10px; display: flex; align-items: center;
-      justify-content: center; font-size: 18px; flex-shrink: 0;
-      box-shadow: 0 0 20px var(--accent-glow);
+      width: 40px; height: 40px;
+      border-radius: 10px; flex-shrink: 0; overflow: hidden;
     }
+    .rk-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
     .rk-brand-name  { font-size: 17px; font-weight: 800; letter-spacing: -.4px; }
     .rk-brand-sub   { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text3); letter-spacing: .8px; text-transform: uppercase; margin-top: 1px; }
     .rk-pro-badge   { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--amber); border: 1px solid rgba(245,166,35,.3); padding: 3px 9px; border-radius: 20px; background: var(--amber-dim); white-space: nowrap; }
@@ -489,7 +487,7 @@
   <!-- HEADER -->
   <header class="rk-header">
     <div class="rk-brand">
-      <div class="rk-logo">📋</div>
+      <div class="rk-logo"><img src="./assets/Designer.png" alt="RosterKit" /></div>
       <div>
         <div class="rk-brand-name">RosterKit</div>
         <div class="rk-brand-sub">Manager Mode</div>
@@ -922,24 +920,26 @@
   <div class="rk-paywall" id="rk-paywall" onclick="closePaywallOutside(event)">
     <div class="rk-paywall-sheet">
       <div class="rk-paywall-handle"></div>
-      <h2 id="rk-paywall-heading">Unlock RosterKit Pro</h2>
-      <p class="rk-paywall-sub" id="rk-paywall-sub">One purchase. No subscription. Yours forever.</p>
+      <h2 id="rk-paywall-heading">Upgrade to RosterKit Pro</h2>
+      <p class="rk-paywall-sub" id="rk-paywall-sub">Full access for your whole team. Cancel anytime.</p>
       <div class="rk-paywall-features">
         <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">👥</span><div><strong>Unlimited staff, jobs & locations</strong><span>Free plan: 3 staff, 3 jobs, 1 location</span></div></div>
         <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">📅</span><div><strong>Unlimited .ics sending</strong><span>Email shift confirmations to every staff member</span></div></div>
         <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">📥</span><div><strong>Import staff availability</strong><span>Import .json files sent by your team</span></div></div>
         <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">📊</span><div><strong>PDF & CSV export</strong><span>Download or print your roster</span></div></div>
-        <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">☁️</span><div><strong>Scheduled iCloud backup</strong><span>Auto-backup on your chosen schedule</span></div></div>
+        <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">☁️</span><div><strong>iCloud backup</strong><span>Full backup of all your roster data</span></div></div>
         <div class="rk-paywall-feat"><span class="rk-paywall-feat-icon">📆</span><div><strong>Multi-week planning</strong><span>Plan rosters weeks ahead</span></div></div>
       </div>
-      <div class="rk-paywall-price">
-        <strong id="rk-iap-price">$14.99</strong><span> one-time</span>
+      <div class="rk-paywall-price" style="text-align:center;margin-bottom:16px;">
+        <div style="margin-bottom:6px;"><strong style="font-size:28px;font-weight:800;letter-spacing:-.5px;">$5.99</strong><span style="font-size:13px;color:var(--text3);">/month</span></div>
+        <div style="font-size:13px;color:var(--text3);">or <strong style="color:var(--text);">$59.99</strong>/year <span style="color:var(--green);font-weight:700;">— save $11.89</span></div>
       </div>
       <div class="rk-paywall-actions">
-        <button class="rk-btn rk-btn-primary rk-btn-full" onclick="purchasePro()">Unlock Pro</button>
+        <button class="rk-btn rk-btn-primary rk-btn-full" onclick="purchaseAnnual()">Subscribe Annually — $59.99/yr</button>
+        <button class="rk-btn rk-btn-ghost rk-btn-full"   onclick="purchaseMonthly()">Subscribe Monthly — $5.99/mo</button>
         <button class="rk-btn rk-btn-ghost rk-btn-full"   onclick="closePaywall()">Maybe Later</button>
       </div>
-      <div class="rk-restore-link" onclick="restorePurchase()">Restore previous purchase</div>
+      <div class="rk-restore-link" onclick="restorePurchase()">Restore subscription</div>
     </div>
   </div>
 
@@ -1077,10 +1077,10 @@
       if (heading && sub) {
         if (inTrial) {
           heading.textContent = daysLeft + ' trial day' + (daysLeft !== 1 ? 's' : '') + ' remaining';
-          sub.textContent     = 'Unlock Pro to keep full access after your trial ends. One purchase, no subscription.';
+          sub.textContent     = 'Subscribe to keep full access after your trial ends. Cancel anytime.';
         } else if (!state.isPro) {
-          heading.textContent = 'Unlock RosterKit Pro';
-          sub.textContent     = 'One purchase. No subscription. Yours forever.';
+          heading.textContent = 'Upgrade to RosterKit Pro';
+          sub.textContent     = 'Full access for your whole team. Cancel anytime.';
         }
       }
       $('rk-paywall').classList.add('open');
@@ -1091,12 +1091,15 @@
     window.closePaywallOutside = function(e) {
       if (e.target === $('rk-paywall')) closePaywall();
     };
-    window.purchasePro = function() {
-      // In production: call Capacitor IAP plugin here
-      // window.Capacitor?.Plugins?.InAppPurchases?.purchaseProduct({productId:'com.philvieyra.rosterkit.unlock'})
-      toast('Opening App Store purchase…', 'info');
-      // Simulate for UI demo:
-      setTimeout(() => { state.isPro = true; save(); updateProUI(); closePaywall(); toast('RosterKit Pro unlocked!', 'success'); }, 800);
+    window.purchaseMonthly = function() {
+      // In production: window.Capacitor?.Plugins?.InAppPurchases?.purchaseProduct({productId:'com.philvieyra.rosterkit.monthly'})
+      toast('Opening App Store…', 'info');
+      setTimeout(() => { state.isPro = true; save(); updateProUI(); closePaywall(); toast('RosterKit Pro activated!', 'success'); }, 800);
+    };
+    window.purchaseAnnual = function() {
+      // In production: window.Capacitor?.Plugins?.InAppPurchases?.purchaseProduct({productId:'com.philvieyra.rosterkit.annual'})
+      toast('Opening App Store…', 'info');
+      setTimeout(() => { state.isPro = true; save(); updateProUI(); closePaywall(); toast('RosterKit Pro activated!', 'success'); }, 800);
     };
     window.restorePurchase = function() {
       toast('Checking previous purchase…', 'info');
